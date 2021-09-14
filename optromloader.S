@@ -230,6 +230,6 @@ readblocksbs_str: db 8,8,0
 ;readblocksbs_str: db 13,10,"Rd+",0
 ;cksum_str: db 13,10,"Ck+",0
 .finalize_bootblock:
-	times 510-($-$$) db 0
+	times 510-($-$$) db $cc
 	dw $AA55
 bootblock_end:
