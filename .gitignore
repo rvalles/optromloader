@@ -1,0 +1,9 @@
+*.bin
+*.rom
+*.img
+*.kate-swp
+*.86
+*.386
+optromloader9
+optromloader15
+optromloader18
