@@ -72,8 +72,7 @@ start:
 	;mov si,cksum_str
 	;call printstr
 	;*** Call ROM image entrypoint
-	mov ax,es
-	mov [.calloptrom+3],ax ;replace target segment in long call
+	mov [.calloptrom+3],es ;replace target segment in long call
 	mov ah,0eh
 	mov al,'#'
 	int 10h
