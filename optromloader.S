@@ -78,11 +78,14 @@ start:
 	;call printstr
 	;*** Call ROM image entrypoint
 	mov [.calloptrom+3],es ;replace target segment in long call
+	;mov word [bootblock_end],3
+	;mov [bootblock_end+2],es
 	mov si,rominit_str
 	call printstr
 	;sti ;some bad BIOSs disable on int13 and forget to restore
 .calloptrom:
 	call 0xA000:3 ;long jump. Segment placeholder gets replaced by mov above
+	;call far [bootblock_end]
 	;*** Tell BIOS to try booting elsewhere
 	mov si,int19h_str
 	call printstr
