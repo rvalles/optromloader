@@ -68,7 +68,7 @@ start:
 	;mov si,cksum_str
 	;call printstr
 	mov ax,es
-	mov [.calloptrom+3], ax
+	mov [.calloptrom+3],ax
 	mov ah,0eh
 	mov al,'#'
 	int 10h
