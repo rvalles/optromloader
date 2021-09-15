@@ -167,13 +167,10 @@ readblock: ;AX blocknumber, ES:BX addr, trashes AX
 	;tracks>>1 is cyl, tracks&1 is head
 	mov dl,sectorspertrack ;get number of tracks
 	div dl ;ax/dl -> /al, %ah
-	mov dh,0 ;head 0..15
-	test al,1 ;as tracks>>1 is cyl, head is tracks&1
-	jz .heads_even ;skip if even
-	inc dh ;silliest tracks&1 ever
-.heads_even:
+	mov dh,1 ;tracks&1 is head
+	and dh,al ;CHS head 0..15 (0 or 1 for floppy)
 	shr al,1 ;tracks>>1 is cyl
-	;CX 0-5 sector, 6-7 track MSB, 8-15 track LSB
+	;CX 0-5 sector, 6-7 cyl MSB, 8-15 cyl LSB
 	mov ch,al ;cyl
 	inc ah ;CHS sectors start at 1
 	mov cl,ah ;sector
