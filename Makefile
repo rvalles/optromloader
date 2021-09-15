@@ -2,7 +2,7 @@ fasm = fasm
 #hexdumpcmd = hexdump -C
 hexdumpcmd = xxd -a
 qemu = qemu-system-i386
-date = \"`date +%Y%m%d%H%M`\"
+date = \"`date -u +%Y%m%d%H%MZ`\"
 .PHONY: all
 all: hexdump optromloader18 optromloader15 optromloader9 fd1440.img fd720.img fd1200.img fd360.img
 optromloader18: optromloader.S
