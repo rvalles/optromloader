@@ -202,8 +202,8 @@ readblock: ;AX blocknumber, ES:BX addr, trashes AX (future return value)
 	;mov ds,dx
 	;mov ax,[bx]
 	;call printhex16
-	mov dx,0
-	mov ds,dx
+	;mov dx,0
+	;mov ds,dx
 	pop ax ;free AX used for retries
 	pop dx ;restore DX
 	pop cx ;restore CX
