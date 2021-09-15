@@ -88,6 +88,7 @@ bad_header_magic:
 	jmp $
 printstr: ;SI *str
 	push ax
+	cld
 	mov ah,0eh ;print character
 .printstr_loop:
 	lodsb ;SI++ -> al
