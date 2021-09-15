@@ -3,53 +3,58 @@
 ;https://www.rvalles.net
 format binary as "raw"
 use16
-org 7C00h
-jmp 0x0000:start
+org 7C00h ;fixed bootloader load address
+jmp 0x0000:start ;ensure CS is zero
 start:
-	mov sp,$7C00
+	mov sp,$7C00 ;set a stack right under the bootloader
 	mov ax,0
-	mov ss,ax
-	mov ds,ax
+	mov ss,ax ;handed-over SS could be anything, like CS
+	mov ds,ax ;DS can't be trusted either
 	mov si,banner_str
 	call printstr
-	mov ax,1
-	mov bx,bootblock_end
+	;*** Load first block of ROM image (containing ROM header)
+	mov ax,1 ;block number
+	mov bx,bootblock_end ;target addr
 	call readblock
-	mov ax,[bootblock_end]
-	cmp ax,$AA55
+	;*** Check ROM magic value
+	mov ax,[bootblock_end] ;load magic value from ROM header
+	cmp ax,$AA55 ;expected value
 	jnz bad_header_magic
+	;*** Obtain ROM size
 	mov si,romsize_str
 	call printstr
 	mov ax,0
-	mov al,[bootblock_end+2]
-	mov bx,ax
+	mov al,[bootblock_end+2] ;load length from ROM header
+	mov bx,ax ;save length (blocks) into BX
 	call printhex8
 	mov si,romsizebytes_str
 	call printstr
 	mov ax,bx
-	mov cl,9
-	shl ax,cl
+	mov cl,9 ;calculate ROM size in bytes: blocks*512
+	shl ax,cl ;8086 won't take imm above 1
 	call printhex16
+	;*** Adjust conventional/low memory size
 	mov si,ramsize_str
 	call printstr
-	int 12h
+	int 12h ;get low mem size
 	call printhex16
 	mov dx,bx
 	test dx,1
 	jz .blocks_even
-	add dx,1
+	add dx,1 ;round required storage up to 1KB
 .blocks_even:
-	shr dx,1
-	sub ax,dx
-	mov [1043],ax
+	shr dx,1 ;512 blocks becomes 1KB blocks
+	sub ax,dx ;decrease low mem size by rounded size of ROM image
+	mov [1043],ax ;store new low mem size into BIOS variable 40:0013
 	mov si,ramsizeafter_str
 	call printstr
-	int 12h
+	int 12h ;get low mem size
 	call printhex16
+	;*** Setup ROM reading parameters
 	mov cl,6
 	shl ax,cl ;target segment
 	mov es,ax
-	mov dx,0
+	mov dx,0 ;block to read; will become 1 before reading
 	mov si,readblocks_str
 	call printstr
 	mov cx,bx
@@ -68,11 +73,11 @@ start:
 	;mov si,cksum_str
 	;call printstr
 	mov ax,es
-	mov [.calloptrom+3],ax
+	mov [.calloptrom+3],ax ;replace target segment in long call
 	mov ah,0eh
 	mov al,'#'
 	int 10h
-	;sti ;some bad BIOSs disable on int13 and forget to restore.
+	;sti ;some bad BIOSs disable on int13 and forget to restore
 .calloptrom:
 	call 0xA000:3
 	mov ah,0eh
@@ -98,7 +103,7 @@ printstr: ;SI *str
 .printstr_end:
 	pop ax
 	ret
-;FIXME: these value dumpers could be shorter.
+;FIXME: these value dumpers could be shorter
 printhex8: ;AL (preserved) value to print
 	push ax
 	push bx
@@ -106,7 +111,7 @@ printhex8: ;AL (preserved) value to print
 	mov ah,0eh
 	mov bl,al
 	mov cl,4
-	rol bl,cl ;in 8086, 1 or cl. 186+ for higher imm.
+	rol bl,cl ;in 8086, 1 or cl. 186+ for higher imm
 	call printhexdigit
 	rol bl,cl
 	call printhexdigit
@@ -133,7 +138,7 @@ printhex16: ;AX (preserved) value to print
 	pop bx
 	pop ax
 	ret
-printhexdigit: ;FIXME: Make shorter. possibly use daa/adc inst.
+printhexdigit: ;FIXME: Make shorter. possibly use daa/adc inst
 	mov al,bl
 	and al,$F
 	add al,$30
@@ -148,7 +153,7 @@ resetfloppy:
 	mov dl,0
 	int 13h
 	ret
-readblock: ;AX blocknumber, ES:BX (preserved) addr.
+readblock: ;AX blocknumber, ES:BX (preserved) addr
 	;call printhex16
 	;xchg ax,bx
 	;call printhex16
