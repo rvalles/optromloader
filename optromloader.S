@@ -19,7 +19,12 @@ start:
 	;*** Check ROM magic value
 	mov ax,[bootblock_end] ;load magic value from ROM header
 	cmp ax,$AA55 ;expected value
-	jnz bad_header_magic
+	jz .good_header_magic
+	mov si,bad_header_magic_str
+	call printstr
+	call printhex16
+	jmp $ ;deadend infinite loop
+.good_header_magic:
 	;*** Obtain ROM size
 	mov si,romsize_str
 	call printstr
@@ -86,11 +91,6 @@ start:
 	int 19h ;try next boot device (some BIOSs will reboot if none left)
 	;int 19h shouldn't return, so this shouldn't be reached
 ;*****************************************************************************
-bad_header_magic:
-	mov si,bad_header_magic_str
-	call printstr
-	call printhex16
-	jmp $ ;deadend infinite loop
 printstr: ;SI *str
 	push ax ;preserve AX
 	cld ;direction flag could have been set
