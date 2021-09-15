@@ -60,9 +60,9 @@ start:
 	mov cx,bx
 	mov bx,0 ;target address
 .readrom:
-	;hlt
-	add dl,1
-	mov ax,dx
+	;hlt ;delay for debugging
+	inc dx ;increase target block. Needs to be 16bit, as image starts at 1
+	mov ax,dx ;block to seek to and read
 	call printhex8
 	call readblock
 	add bx,512
