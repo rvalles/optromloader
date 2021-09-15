@@ -183,8 +183,8 @@ readblock: ;AX blocknumber, ES:BX addr, trashes AX (future return value)
 	;xchg ax,dx
 	;call printhex16
 	;xchg ax,dx
-	push ax ;preserve AX for potential retries
 .retry:
+	push ax ;preserve AX for potential retries
 	;hlt
 	;push ax
 	;mov ah,0eh
@@ -222,7 +222,6 @@ readblock: ;AX blocknumber, ES:BX addr, trashes AX (future return value)
 	mov si,readblocks_str
 	call printstr ;reprint header in next line to preserve read error on screen
 	pop ax ;restore AX containing parameters for retry
-	push ax ;push AX for potential future retries
 	jmp .retry ;retry reading sector
 banner_str: db "optromloader, by Roc Valles Domenech <rvalles.net>, built ",date,'.',13,10,0
 bad_header_magic_str: db "Ehdrmagic:",0
