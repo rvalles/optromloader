@@ -7,7 +7,7 @@ org 7C00h ;fixed bootloader load address
 jmp 0x0000:start ;ensure CS is zero
 start:
 	mov sp,$7C00 ;set a stack right under the bootloader
-	mov ax,0
+	xor ax,ax
 	mov ss,ax ;handed-over SS could be anything, like CS
 	mov ds,ax ;DS can't be trusted either
 	mov si,banner_str
@@ -58,11 +58,11 @@ start:
 	mov cl,6 ;segments are 2^4 bytes, low ram size in 2^10 bytes, thus <<6.
 	shl ax,cl ;in 8086, 1 or cl. 186+ for higher imm
 	mov es,ax ;target segment
-	mov dx,0 ;block to read; will become 1 before reading
+	xor dx,dx ;block to read; will become 1 before reading
 	mov si,readblocks_str
 	call printstr
 	mov cx,bx ;recover rom length (blocks) from bx
-	mov bx,0 ;target address
+	xor bx,bx ;target address
 .readrom:
 	;hlt ;delay for debugging
 	inc dx ;increase target block. Needs to be 16bit, as image starts at 1
