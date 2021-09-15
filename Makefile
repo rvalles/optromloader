@@ -4,7 +4,7 @@ hexdumpcmd = xxd -a
 qemu = qemu-system-i386
 date = \"`date -u +%Y%m%d%H%MZ`\"
 .PHONY: all
-all: hexdump optromloader18 optromloader15 optromloader9 fd1440.img fd720.img fd1200.img fd360.img
+all: optromloader18 optromloader15 optromloader9 fd1440.img fd720.img fd1200.img fd360.img hexdump
 optromloader18: optromloader.S
 	@echo "*** assembling $@..."
 	$(fasm) -d date=$(date) -d sectorspertrack=18 optromloader.S $@
