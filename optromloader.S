@@ -78,16 +78,14 @@ start:
 	;call printstr
 	;*** Call ROM image entrypoint
 	mov [.calloptrom+3],es ;replace target segment in long call
-	mov ah,0eh
-	mov al,'#'
-	int 10h
+	mov si,rominit_str
+	call printstr
 	;sti ;some bad BIOSs disable on int13 and forget to restore
 .calloptrom:
 	call 0xA000:3 ;long jump. Segment placeholder gets replaced by mov above
 	;*** Tell BIOS to try booting elsewhere
-	mov ah,0eh
-	mov al,'@'
-	int 10h
+	mov si,int19h_str
+	call printstr
 	int 19h ;try next boot device (some BIOSs will reboot if none left)
 	;int 19h shouldn't return, so this shouldn't be reached
 ;*****************************************************************************
@@ -229,6 +227,8 @@ ramsize_str: db 13,10,"RAM:",0
 ramsizeafter_str: db "/",0
 readblocks_str: db 13,10,"Rd:",0
 readblocksbs_str: db 8,8,0
+rominit_str: db 13,10,"ROM Init.",0
+int19h_str: db " INT 19h.",0
 ;readblocksbs_str: db 13,10,"Rd+",0
 ;cksum_str: db 13,10,"Ck+",0
 .finalize_bootblock:
