@@ -31,7 +31,7 @@ start:
 	call printstr
 	mov ax,bx
 	mov cl,9 ;calculate ROM size in bytes: blocks*512
-	shl ax,cl ;8086 won't take imm above 1
+	shl ax,cl ;in 8086, 1 or cl. 186+ for higher imm
 	call printhex16
 	;*** Adjust conventional/low memory size
 	mov si,ramsize_str
@@ -51,9 +51,9 @@ start:
 	int 12h ;get low mem size
 	call printhex16
 	;*** Setup ROM reading parameters
-	mov cl,6
-	shl ax,cl ;target segment
-	mov es,ax
+	mov cl,6 ;segments are 2^4 bytes, low ram size in 2^10 bytes, thus <<6.
+	shl ax,cl ;in 8086, 1 or cl. 186+ for higher imm
+	mov es,ax ;target segment
 	mov dx,0 ;block to read; will become 1 before reading
 	mov si,readblocks_str
 	call printstr
@@ -65,13 +65,14 @@ start:
 	mov ax,dx ;block to seek to and read
 	call printhex8
 	call readblock
-	add bx,512
+	add bx,512 ;next target address += 1 blocksize
 	mov si,readblocksbs_str
 	call printstr
-	cmp cx,dx
-	jne .readrom
+	cmp cx,dx ;are we done
+	jne .readrom ;loop if not
 	;mov si,cksum_str
 	;call printstr
+	;*** Call ROM image entrypoint
 	mov ax,es
 	mov [.calloptrom+3],ax ;replace target segment in long call
 	mov ah,0eh
@@ -79,11 +80,13 @@ start:
 	int 10h
 	;sti ;some bad BIOSs disable on int13 and forget to restore
 .calloptrom:
-	call 0xA000:3
+	call 0xA000:3 ;long jump. Segment placeholder gets replaced by mov above
+	;*** Tell BIOS to try booting elsewhere
 	mov ah,0eh
 	mov al,'@'
 	int 10h
-	int 19h
+	int 19h ;try next boot device (some BIOSs will reboot if none left)
+	;int 19h shouldn't return, so this shouldn't be reached
 ;*****************************************************************************
 bad_header_magic:
 	mov si,bad_header_magic_str
@@ -153,22 +156,23 @@ resetfloppy:
 	mov dl,0
 	int 13h
 	ret
-readblock: ;AX blocknumber, ES:BX (preserved) addr
+readblock: ;AX blocknumber, ES:BX addr, trashes AX
 	;call printhex16
 	;xchg ax,bx
 	;call printhex16
 	;xchg ax,bx
-	push cx
-	push dx
-	;CHS magic: get number of tracks, heads>>1 is cyl
-	mov dl,sectorspertrack
+	push cx ;preserve CX
+	push dx ;preserve DX
+	;*** CHS magic
+	;tracks>>1 is cyl, tracks&1 is head
+	mov dl,sectorspertrack ;get number of tracks
 	div dl ;ax/dl -> /al, %ah
 	mov dh,0 ;head 0..15
-	test al,1
-	jz .heads_even
-	inc dh
+	test al,1 ;as tracks>>1 is cyl, head is tracks&1
+	jz .heads_even ;skip if even
+	inc dh ;silliest tracks&1 ever
 .heads_even:
-	shr al,1
+	shr al,1 ;tracks>>1 is cyl
 	;CX 0-5 sector, 6-7 track MSB, 8-15 track LSB
 	mov ch,al ;cyl
 	inc ah ;CHS sectors start at 1
@@ -182,7 +186,7 @@ readblock: ;AX blocknumber, ES:BX (preserved) addr
 	;xchg ax,dx
 	;call printhex16
 	;xchg ax,dx
-	push ax
+	push ax ;preserve AX for potential retries
 .retry:
 	;hlt
 	;push ax
@@ -190,13 +194,13 @@ readblock: ;AX blocknumber, ES:BX (preserved) addr
 	;mov al,'%'
 	;int 10h
 	;pop ax
-	int 13h
+	int 13h ;call BIOS function for disk operations
 	;push ax
 	;mov ah,0eh
 	;mov al,'?'
 	;int 10h
 	;pop ax
-	cmp ah,0
+	cmp ah,0 ;returned status, where 0 means OK
 	jne .error
 	;mov dx,es
 	;mov ds,dx
@@ -204,25 +208,25 @@ readblock: ;AX blocknumber, ES:BX (preserved) addr
 	;call printhex16
 	mov dx,0
 	mov ds,dx
-	pop ax
-	pop dx
-	pop cx
+	pop ax ;free AX
+	pop dx ;restore DX
+	pop cx ;restore CX
 	ret
 .error:
-	push ax
+	push ax ;preserve AX
 	mov ah,0eh
 	mov al,'E'
 	int 10h
-	pop ax
-	mov al,ah
+	pop ax ;restore AX
+	mov al,ah ;status was returned in AH
 	mov ah,0
-	call printhex8
+	call printhex8 ;print status value
 	call resetfloppy
 	mov si,readblocks_str
-	call printstr
-	pop ax
-	push ax
-	jmp .retry
+	call printstr ;reprint header in next line to preserve read error on screen
+	pop ax ;restore AX containing parameters for retry
+	push ax ;push AX for potential future retries
+	jmp .retry ;retry reading sector
 banner_str: db "optromloader, by Roc Valles Domenech <rvalles.net>, built ",date,'.',13,10,0
 bad_header_magic_str: db "Ehdrmagic:",0
 romsize_str: db "ROM blks:",0
