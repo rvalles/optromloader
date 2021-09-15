@@ -13,7 +13,7 @@ start:
 	mov si,banner_str
 	call printstr
 	;*** Load first block of ROM image (containing ROM header)
-	mov ax,1 ;block number
+	mov al,1 ;block number
 	mov bx,bootblock_end ;target addr
 	call readblock
 	;*** Check ROM magic value
