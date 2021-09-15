@@ -84,7 +84,7 @@ start:
 	call printstr
 	;sti ;some bad BIOSs disable on int13 and forget to restore
 .calloptrom:
-	call 0xA000:3 ;long jump. Segment placeholder gets replaced by mov above
+	call $CAFE:3 ;long jump. Segment placeholder gets replaced by mov above
 	;call far [bootblock_end]
 	;*** Tell BIOS to try booting elsewhere
 	mov si,int19h_str
