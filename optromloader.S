@@ -156,7 +156,7 @@ resetfloppy:
 	mov dl,0
 	int 13h
 	ret
-readblock: ;AX blocknumber, ES:BX addr, trashes AX
+readblock: ;AX blocknumber, ES:BX addr, trashes AX (future return value)
 	;call printhex16
 	;xchg ax,bx
 	;call printhex16
@@ -205,7 +205,7 @@ readblock: ;AX blocknumber, ES:BX addr, trashes AX
 	;call printhex16
 	mov dx,0
 	mov ds,dx
-	pop ax ;free AX
+	pop ax ;free AX used for retries
 	pop dx ;restore DX
 	pop cx ;restore CX
 	ret
