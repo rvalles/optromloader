@@ -8,7 +8,6 @@ jmp 0x0000:start
 start:
 	mov sp,$7C00
 	mov ax,0
-	mov bx,ss
 	mov ss,ax
 	mov ds,ax
 	mov si,banner_str
