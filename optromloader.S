@@ -29,7 +29,6 @@ start:
 	call printhex8
 	mov si,romsizebytes_str
 	call printstr
-	mov ax,bx
 	mov cl,9 ;calculate ROM size in bytes: blocks*512
 	shl ax,cl ;in 8086, 1 or cl. 186+ for higher imm
 	call printhex16
