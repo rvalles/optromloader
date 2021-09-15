@@ -232,6 +232,6 @@ int19h_str: db " INT 19h.",0
 ;readblocksbs_str: db 13,10,"Rd+",0
 ;cksum_str: db 13,10,"Ck+",0
 .finalize_bootblock:
-	times 510-($-$$) db $cc
+	times 510-($-$$) db $cc ;int3, a breakpoint. Better results should IP end up pointing here.
 	dw $AA55
 bootblock_end:
