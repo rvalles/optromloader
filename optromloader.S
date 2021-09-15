@@ -41,7 +41,7 @@ start:
 	mov dx,bx
 	test dx,1
 	jz .blocks_even
-	add dx,1 ;round required storage up to 1KB
+	inc dx ;round required storage up to 1KB
 .blocks_even:
 	shr dx,1 ;512 blocks becomes 1KB blocks
 	sub ax,dx ;decrease low mem size by rounded size of ROM image
@@ -166,12 +166,12 @@ readblock: ;AX blocknumber, ES:BX (preserved) addr
 	mov dh,0 ;head 0..15
 	test al,1
 	jz .heads_even
-	add dh,1
+	inc dh
 .heads_even:
 	shr al,1
 	;CX 0-5 sector, 6-7 track MSB, 8-15 track LSB
 	mov ch,al ;cyl
-	add ah,1 ;CHS sectors start at 1
+	inc ah ;CHS sectors start at 1
 	mov cl,ah ;sector
 	mov ah,02h ;BIOS 13h read CHS block
 	mov al,1 ;sectors to read 1..128
