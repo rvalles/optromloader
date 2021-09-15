@@ -171,9 +171,9 @@ readblock: ;AX blocknumber, ES:BX addr, trashes AX
 	and dh,al ;CHS head 0..15 (0 or 1 for floppy)
 	shr al,1 ;tracks>>1 is cyl
 	;CX 0-5 sector, 6-7 cyl MSB, 8-15 cyl LSB
-	mov ch,al ;cyl
+	mov ch,al ;CHS cyl LSB.
 	inc ah ;CHS sectors start at 1
-	mov cl,ah ;sector
+	mov cl,ah ;CHS sector in LSB, cyl MSB (zero) in MSB
 	mov ah,02h ;BIOS 13h read CHS block
 	mov al,1 ;sectors to read 1..128
 	mov dl,0 ;drive 0=A 80h=hdd0
