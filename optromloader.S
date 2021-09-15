@@ -15,8 +15,8 @@ start:
 	mov ax,1
 	mov bx,bootblock_end
 	call readblock
-	mov bx,[bootblock_end]
-	cmp bx,$AA55
+	mov ax,[bootblock_end]
+	cmp ax,$AA55
 	jnz bad_header_magic
 	mov si,romsize_str
 	call printstr
@@ -83,7 +83,6 @@ start:
 bad_header_magic:
 	mov si,bad_header_magic_str
 	call printstr
-	mov ax,bx
 	call printhex16
 	jmp $
 printstr: ;SI *str
