@@ -37,7 +37,7 @@ start:
 	call printstr
 	int 12h ;get low mem size
 	call printhex16
-	mov dx,bx
+	mov dx,bx ;recover rom length (blocks) from bx
 	test dx,1
 	jz .blocks_even
 	inc dx ;round required storage up to 1KB
@@ -56,7 +56,7 @@ start:
 	mov dx,0 ;block to read; will become 1 before reading
 	mov si,readblocks_str
 	call printstr
-	mov cx,bx
+	mov cx,bx ;recover rom length (blocks) from bx
 	mov bx,0 ;target address
 .readrom:
 	;hlt ;delay for debugging
@@ -91,10 +91,10 @@ bad_header_magic:
 	mov si,bad_header_magic_str
 	call printstr
 	call printhex16
-	jmp $
+	jmp $ ;deadend infinite loop
 printstr: ;SI *str
-	push ax
-	cld
+	push ax ;preserve AX
+	cld ;direction flag could have been set
 	mov ah,0eh ;print character
 .printstr_loop:
 	lodsb ;SI++ -> al
@@ -103,13 +103,13 @@ printstr: ;SI *str
 	int 10h ;print
 	jmp .printstr_loop
 .printstr_end:
-	pop ax
+	pop ax ;restore AX
 	ret
 ;FIXME: these value dumpers could be shorter
 printhex8: ;AL (preserved) value to print
-	push ax
-	push bx
-	push cx
+	push ax ;preserve AX
+	push bx ;preserve BX
+	push cx ;preserve CX
 	mov ah,0eh
 	mov bl,al
 	mov cl,4
@@ -117,14 +117,14 @@ printhex8: ;AL (preserved) value to print
 	call printhexdigit
 	rol bl,cl
 	call printhexdigit
-	pop cx
-	pop bx
-	pop ax
+	pop cx ;restore CX
+	pop bx ;restore BX
+	pop ax ;restore AX
 	ret
 printhex16: ;AX (preserved) value to print
-	push ax
-	push bx
-	push cx
+	push ax ;preserve AX
+	push bx ;preserve BX
+	push cx ;preserve CX
 	mov bx,ax
 	mov ah,0eh
 	mov cl,4
@@ -136,9 +136,9 @@ printhex16: ;AX (preserved) value to print
 	call printhexdigit
 	rol bx,cl
 	call printhexdigit
-	pop cx
-	pop bx
-	pop ax
+	pop cx ;restore CX
+	pop bx ;restore BX
+	pop ax ;restore AX
 	ret
 printhexdigit: ;FIXME: Make shorter. possibly use daa/adc inst
 	mov al,bl
