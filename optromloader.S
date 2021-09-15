@@ -23,7 +23,7 @@ start:
 	;*** Obtain ROM size
 	mov si,romsize_str
 	call printstr
-	mov ax,0
+	mov ah,0
 	mov al,[bootblock_end+2] ;load length from ROM header
 	mov bx,ax ;save length (blocks) into BX
 	call printhex8
