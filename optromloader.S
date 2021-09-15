@@ -98,7 +98,7 @@ printstr: ;SI *str
 	mov ah,0eh ;print character
 .printstr_loop:
 	lodsb ;SI++ -> al
-	test al,al
+	test al,al ;are we done? (is character a NUL?)
 	jz .printstr_end
 	int 10h ;print
 	jmp .printstr_loop
@@ -106,7 +106,7 @@ printstr: ;SI *str
 	pop ax ;restore AX
 	ret
 ;FIXME: these value dumpers could be shorter
-printhex8: ;AL (preserved) value to print
+printhex8: ;AL value to print
 	push ax ;preserve AX
 	push bx ;preserve BX
 	push cx ;preserve CX
@@ -115,45 +115,45 @@ printhex8: ;AL (preserved) value to print
 	mov cl,4
 	rol bl,cl ;in 8086, 1 or cl. 186+ for higher imm
 	call printhexdigit
-	rol bl,cl
+	rol bl,cl ;in 8086, 1 or cl. 186+ for higher imm
 	call printhexdigit
 	pop cx ;restore CX
 	pop bx ;restore BX
 	pop ax ;restore AX
 	ret
-printhex16: ;AX (preserved) value to print
+printhex16: ;AX value to print
 	push ax ;preserve AX
 	push bx ;preserve BX
 	push cx ;preserve CX
-	mov bx,ax
+	mov bx,ax ;we will make multiple BIOS calls using AX
 	mov ah,0eh
 	mov cl,4
-	rol bx,cl
+	rol bx,cl ;in 8086, 1 or cl. 186+ for higher imm
 	call printhexdigit
-	rol bx,cl
+	rol bx,cl ;in 8086, 1 or cl. 186+ for higher imm
 	call printhexdigit
-	rol bx,cl
+	rol bx,cl ;in 8086, 1 or cl. 186+ for higher imm
 	call printhexdigit
-	rol bx,cl
+	rol bx,cl ;in 8086, 1 or cl. 186+ for higher imm
 	call printhexdigit
 	pop cx ;restore CX
 	pop bx ;restore BX
 	pop ax ;restore AX
 	ret
 printhexdigit: ;FIXME: Make shorter. possibly use daa/adc inst
-	mov al,bl
-	and al,$F
-	add al,$30
-	cmp al,$3A
+	mov al,bl ;two nibbles copied
+	and al,$F ;we only need the least significant nibble
+	add al,$30 ;'0'
+	cmp al,$3A ;'9'+1
 	jb .printhexlow
-	add al,7
+	add al,7 ;'9'+1+7 = 'A'
 .printhexlow:
 	int 10h
 	ret
 resetfloppy:
-	mov ah,0
-	mov dl,0
-	int 13h
+	mov ah,0 ;reset command
+	mov dl,0 ;drive 0=A 80h=hdd0
+	int 13h ;call BIOS function for disk operations
 	ret
 readblock: ;AX blocknumber, ES:BX addr, trashes AX (future return value)
 	;call printhex16
