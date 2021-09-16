@@ -124,50 +124,31 @@ printstr: ;0:SI *str, ***zeroes DS***
 .printstr_end:
 	pop ax ;restore AX
 	ret
-;FIXME: these value dumpers could be shorter
-printhex8: ;AL value to print
-	push ax ;preserve AX
-	push bx ;preserve BX
+printhex8: ;character in AX
 	push cx ;preserve CX
-	mov ah,0eh
-	mov bl,al
-	mov cl,4
-	rol bl,cl ;in 8086, 1 or cl. 186+ for higher imm
-	call printhexdigit
-	rol bl,cl ;in 8086, 1 or cl. 186+ for higher imm
-	call printhexdigit
-	pop cx ;restore CX
-	pop bx ;restore BX
-	pop ax ;restore AX
-	ret
-printhex16: ;AX value to print
-	push ax ;preserve AX
-	push bx ;preserve BX
+	mov cl,4 ;how much to shift right to get first nibble
+	jmp _printhexdigits
+printhex16:
 	push cx ;preserve CX
-	mov bx,ax ;we will make multiple BIOS calls using AX
+	mov cl,12 ;how much to shift right to get first nibble
+_printhexdigits: ;intentional fallthrough
+	push ax ;preserve AX
+	push dx ;preserve DX
+	mov dx,ax ;save whole 16bit
+.hexdigit:
+	mov ax,dx ;recover whole 16bit
+	shr ax,cl ;get relevant nibble into place
+	and al,$F ;get rid of anything but relevant nible
+	daa ;if (AL>9) AL+=6
+	add al,-16 ;CF if AL>=16, or AL>9 before the DAA
+	adc al,'0'+16 ;adc using prepared CF. We compensate 16 for last opcode
 	mov ah,0eh
-	mov cl,4
-	rol bx,cl ;in 8086, 1 or cl. 186+ for higher imm
-	call printhexdigit
-	rol bx,cl ;in 8086, 1 or cl. 186+ for higher imm
-	call printhexdigit
-	rol bx,cl ;in 8086, 1 or cl. 186+ for higher imm
-	call printhexdigit
-	rol bx,cl ;in 8086, 1 or cl. 186+ for higher imm
-	call printhexdigit
-	pop cx ;restore CX
-	pop bx ;restore BX
-	pop ax ;restore AX
-	ret
-printhexdigit: ;FIXME: Make shorter. possibly use daa/adc inst
-	mov al,bl ;two nibbles copied
-	and al,$F ;we only need the least significant nibble
-	add al,$30 ;'0'
-	cmp al,$3A ;'9'+1
-	jb .printhexlow
-	add al,7 ;'9'+1+7 = 'A'
-.printhexlow:
 	int 10h
+	sub cl,4 ;next digit will need less shifting to prepare
+	jns .hexdigit
+	pop dx ;restore DX
+	pop ax ;restore AX
+	pop cx ;restore CX
 	ret
 readblock: ;AX blocknumber, ES:BX addr, trashes AX (future return value)
 	;call printhex16
