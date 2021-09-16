@@ -93,6 +93,7 @@ start:
 	jz .checksum_good
 	mov si,checksum_bad_str
 	call printstr
+	jmp $
 .checksum_good:
 	mov si,checksum_good_str
 	call printstr
