@@ -43,13 +43,9 @@ start:
 	int 12h ;get low mem size
 	call printhex16
 	mov dx,bx ;recover rom length (blocks) from bx
-	test dx,1
-	jz .blocks_even
-	inc dx ;round required storage up to 1KB
-.blocks_even:
+	inc dx ;round up to even
 	shr dx,1 ;512 blocks becomes 1KB blocks
-	sub ax,dx ;decrease low mem size by rounded size of ROM image
-	mov [1043],ax ;store new low mem size into BIOS variable 40:0013
+	sub [1043],dx ;store new low mem size into BIOS variable 40:0013
 	mov si,ramsizeafter_str
 	call printstr
 	int 12h ;get low mem size
