@@ -74,8 +74,28 @@ start:
 	call printstr
 	cmp cx,dx ;are we done
 	jne .readrom ;loop if not
-	;mov si,cksum_str
-	;call printstr
+	;*** Verify checksum
+	mov si,checksum_str
+	call printstr
+	xor si,si
+	mov ax,es ;can't mov ES to DS directly
+	mov ds,ax ;DS now points to the rom we loaded earlier
+	mov dx,cx ;CX contains rom size in blocks
+	mov cl,9 ;calculate ROM size in bytes: blocks*512
+	shl dx,cl ;in 8086, 1 or cl. 186+ for higher imm
+	mov cx,dx ;put back in CX for later loop use
+	;DS:SI addr (single segment!), CX size. AX/Zflag if bad
+	mov dl,0
+.checksum_loop:
+	lodsb
+	sub dl,al
+	loop .checksum_loop
+	jz .checksum_good
+	mov si,checksum_bad_str
+	call printstr
+.checksum_good:
+	mov si,checksum_good_str
+	call printstr
 	;*** Call ROM image entrypoint
 	mov [.calloptrom+3],es ;replace target segment in long call
 	;mov word [bootblock_end],3
@@ -92,8 +112,10 @@ start:
 	int 19h ;try next boot device (some BIOSs will reboot if none left)
 	;int 19h shouldn't return, so this shouldn't be reached
 ;*****************************************************************************
-printstr: ;SI *str
+printstr: ;0:SI *str, ***zeroes DS***
 	push ax ;preserve AX
+	xor ax,ax
+	mov ds,ax ;zero DS.
 	cld ;direction flag could have been set
 	mov ah,0eh ;print character
 .printstr_loop:
@@ -218,18 +240,20 @@ readblock: ;AX blocknumber, ES:BX addr, trashes AX (future return value)
 	call printstr ;reprint header in next line to preserve read error on screen
 	pop ax ;restore AX containing parameters for retry
 	jmp .retry ;retry reading sector
-banner_str: db "optromloader, by Roc Valles Domenech <rvalles.net>, built ",date,'.',13,10,0
-bad_header_magic_str: db "Ehdrmagic:",0
+banner_str: db "optromloader, by Roc Valles Domenech, built ",date,'.',13,10,0
+bad_header_magic_str: db "Ehdr:",0
 romsize_str: db "ROM blks:",0
 romsizebytes_str: db "->",0
 ramsize_str: db 13,10,"RAM:",0
 ramsizeafter_str: db "/",0
 readblocks_str: db 13,10,"Rd:",0
 readblocksbs_str: db 8,8,0
-rominit_str: db 13,10,"ROM Init.",0
-int19h_str: db " INT 19h.",0
 ;readblocksbs_str: db 13,10,"Rd+",0
-;cksum_str: db 13,10,"Ck+",0
+rominit_str: db 13,10,"ROMInit.",0
+int19h_str: db "int19h.",0
+checksum_str: db 13,10,"Ck+",0
+checksum_bad_str: db "BAD!",0
+checksum_good_str: db "OK",0
 .finalize_bootblock:
 	times 510-($-$$) db $cc ;int3, a breakpoint. Better results should IP end up pointing here.
 	dw $AA55

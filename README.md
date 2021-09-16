@@ -34,6 +34,7 @@ Booted from a floppy, it will load an Option ROM image into the end of conventio
   * pad to floppy size.
 
 ## Caveats
+* ROM size limited to <= 63.5KB.
 * Hardcoded to use the first floppy drive.
 * ROM checksum isn't checked (yet).
   * Always ensure a boot ROM is signed before burning.
