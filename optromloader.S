@@ -77,7 +77,7 @@ start:
 	;*** Verify checksum
 	mov si,checksum_str
 	call printstr
-	xor si,si
+	xor si,si ;address of data to checksum. At start of segment
 	mov ax,es ;can't mov ES to DS directly
 	mov ds,ax ;DS now points to the rom we loaded earlier
 	mov dx,cx ;CX contains rom size in blocks
