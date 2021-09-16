@@ -244,9 +244,9 @@ readblock: ;AX blocknumber, ES:BX addr, trashes AX (future return value)
 banner_str: db "optromloader, by Roc Valles Domenech, built ",date,'.',13,10,0
 bad_header_magic_str: db "Ehdr:",0
 romsize_str: db "ROM blks:",0
-romsizebytes_str: db "->",0
+romsizebytes_str: db "|",0
 ramsize_str: db 13,10,"RAM:",0
-ramsizeafter_str: db "/",0
+ramsizeafter_str: db "->",0
 readblocks_str: db 13,10,"Rd:",0
 readblocksbs_str: db 8,8,0
 ;readblocksbs_str: db 13,10,"Rd+",0
