@@ -16,20 +16,24 @@ optromloader9: optromloader.S
 	$(fasm) -d date=$(date) -d sectorspertrack=9 optromloader.S $@
 fd1440.img: optromloader18 optrom.bin
 	@echo "*** building $@..."
-	cat optromloader18 optrom.bin | dd bs=1474560 conv=sync of=$@
+	cat optromloader18 optrom.bin >pad.bin && dd bs=1474560 conv=sync if=pad.bin of=$@
+	rm -f pad.bin
 fd720.img: optromloader9 optrom.bin
 	@echo "*** building $@..."
-	cat optromloader9 optrom.bin | dd bs=737280 conv=sync of=$@
+	cat optromloader9 optrom.bin >pad.bin && dd bs=737280 conv=sync if=pad.bin of=$@
+	rm -f pad.bin
 fd1200.img: optromloader15 optrom.bin
 	@echo "*** building $@..."
-	cat optromloader15 optrom.bin | dd bs=1228800 conv=sync of=$@
+	cat optromloader15 optrom.bin >pad.bin && dd bs=1228800 conv=sync if=pad.bin of=$@
+	rm -f pad.bin
 fd360.img: optromloader9 optrom.bin
 	@echo "*** building $@..."
-	cat optromloader9 optrom.bin | dd bs=368640 conv=sync of=$@
+	cat optromloader9 optrom.bin >pad.bin && dd bs=368640 conv=sync if=pad.bin of=$@
+	rm -f pad.bin
 .PHONY: clean
 clean:
 	@echo "*** Removing build artifacts..."
-	rm -f optromloader9 optromloader15 optromloader18 fd1440.img fd720.img fd1200.img fd360.img
+	rm -f optromloader9 optromloader15 optromloader18 fd1440.img fd720.img fd1200.img fd360.img pad.bin
 .PHONY: hexdump
 hexdump: optromloader18
 	@echo "*** hexdump optromloader18..."
