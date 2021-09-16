@@ -210,18 +210,14 @@ readblock: ;AX blocknumber, ES:BX addr, trashes AX (future return value)
 	int 10h
 	pop ax ;restore AX
 	mov al,ah ;status was returned in AH
-	mov ah,0
 	call printhex8 ;print status value
-	call .resetfloppy
+	mov ah,0 ;reset command
+	mov dl,0 ;drive 0=A 80h=hdd0
+	int 13h ;call BIOS function for disk operations
 	mov si,readblocks_str
 	call printstr ;reprint header in next line to preserve read error on screen
 	pop ax ;restore AX containing parameters for retry
 	jmp .retry ;retry reading sector
-.resetfloppy:
-	mov ah,0 ;reset command
-	mov dl,0 ;drive 0=A 80h=hdd0
-	int 13h ;call BIOS function for disk operations
-	ret
 banner_str: db "optromloader, by Roc Valles Domenech <rvalles.net>, built ",date,'.',13,10,0
 bad_header_magic_str: db "Ehdrmagic:",0
 romsize_str: db "ROM blks:",0
