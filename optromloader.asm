@@ -97,7 +97,7 @@ start:
 	mov [.calloptrom+3],es ;replace target segment in long call
 	mov si,rominit_str
 	call printstr
-	;sti ;some bad BIOSs disable on int13 and forget to restore
+	sti ;some bad BIOSs disable interrupts on int 13h
 .calloptrom:
 	call $CAFE:3 ;long call. Segment placeholder gets replaced by mov above
 	;*** Tell BIOS to try booting elsewhere
