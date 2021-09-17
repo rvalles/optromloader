@@ -32,8 +32,9 @@ start:
 	mov al,[bootblock_end+2] ;load length from ROM header
 	mov bx,ax ;save length (blocks) into BX
 	call printhex8 ;length in blocks
-	mov si,romsizebytes_str
-	call printstr
+	mov al,'|'
+	call printchar ;print a separator between blocks and bytes
+	mov ax,bx ;recover rom length (blocks) from BX
 	mov cl,9 ;calculate ROM size in bytes: blocks*512
 	shl ax,cl ;in 8086, 1 or cl. 186+ for higher imm
 	call printhex16 ;length in bytes
@@ -199,7 +200,6 @@ readblock: ;AX blocknumber, ES:BX addr, trashes AX (future return value)
 banner_str: db "optromloader, by Roc Valles Domenech, built ",date,'.',13,10,0
 bad_header_magic_str: db "Ehdr:",0
 romsize_str: db "ROM blks:",0
-romsizebytes_str: db "|",0
 ramsize_str: db 13,10,"RAM:",0
 ramsizeafter_str: db "->",0
 readblocks_str: db 13,10,"Rd:",0
