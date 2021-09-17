@@ -106,17 +106,29 @@ start:
 	int 19h ;try next boot device (some BIOSs will reboot if none left)
 	;int 19h shouldn't return, so this shouldn't be reached
 ;*****************************************************************************
+printchar: ;AL character to print
+	push bx ;preserve BX
+	push ax ;preserve AX
+	mov ah,0fh ;get current video state
+	int 10h ;bh is set to current page
+	mov bl,$7 ;light grey
+	pop ax ;restore AX
+	push ax ;preserve AX again
+	mov ah,0eh ;print character (teletype)
+	int 10h ;character finally printed
+	pop ax ;restore AX
+	pop bx ;restore BX
+	ret
 printstr: ;0:SI *str, ***zeroes DS***
 	push ax ;preserve AX
 	xor ax,ax
 	mov ds,ax ;zero DS.
 	cld ;direction flag could have been set
-	mov ah,0eh ;print character
 .printstr_loop:
 	lodsb ;SI++ -> al
 	test al,al ;are we done? (is character a NUL?)
 	jz .printstr_end
-	int 10h ;print
+	call printchar
 	jmp .printstr_loop
 .printstr_end:
 	pop ax ;restore AX
@@ -135,12 +147,11 @@ _printhexdigits: ;intentional fallthrough
 .hexdigit:
 	mov ax,dx ;recover whole 16bit
 	shr ax,cl ;get relevant nibble into place
-	and al,$F ;get rid of anything but relevant nible
+	and al,$F ;get rid of anything but relevant nibble
 	daa ;if (AL>9) AL+=6
 	add al,-16 ;CF if AL>=16, or AL>9 before the DAA
 	adc al,'0'+16 ;adc using prepared CF. We compensate 16 for last opcode
-	mov ah,0eh
-	int 10h
+	call printchar
 	sub cl,4 ;next digit will need less shifting to prepare
 	jns .hexdigit
 	pop dx ;restore DX
@@ -174,11 +185,8 @@ readblock: ;AX blocknumber, ES:BX addr, trashes AX (future return value)
 	pop cx ;restore CX
 	ret
 .error:
-	push ax ;preserve AX
-	mov ah,0eh
 	mov al,'E'
-	int 10h
-	pop ax ;restore AX
+	call printchar
 	mov al,ah ;status was returned in AH
 	call printhex8 ;print status value
 	mov ah,0 ;reset command
