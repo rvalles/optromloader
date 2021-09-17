@@ -13,7 +13,7 @@ start:
 	mov si,banner_str
 	call printstr
 	;*** Load first block of ROM image (containing ROM header)
-	mov al,1 ;block number
+	mov al,1 ;block number (0 bootloader, 1+ ROM image)
 	mov bx,bootblock_end ;target addr
 	call readblock
 	;*** Check ROM magic value
@@ -89,7 +89,7 @@ start:
 	jz .checksum_good
 	mov si,checksum_bad_str
 	call printstr
-	jmp $
+	jmp $ ;deadend infinite loop
 .checksum_good:
 	mov si,checksum_good_str
 	call printstr
