@@ -95,14 +95,11 @@ start:
 	call printstr
 	;*** Call ROM image entrypoint
 	mov [.calloptrom+3],es ;replace target segment in long call
-	;mov word [bootblock_end],3
-	;mov [bootblock_end+2],es
 	mov si,rominit_str
 	call printstr
 	;sti ;some bad BIOSs disable on int13 and forget to restore
 .calloptrom:
 	call $CAFE:3 ;long jump. Segment placeholder gets replaced by mov above
-	;call far [bootblock_end]
 	;*** Tell BIOS to try booting elsewhere
 	mov si,int19h_str
 	call printstr
@@ -151,10 +148,6 @@ _printhexdigits: ;intentional fallthrough
 	pop cx ;restore CX
 	ret
 readblock: ;AX blocknumber, ES:BX addr, trashes AX (future return value)
-	;call printhex16
-	;xchg ax,bx
-	;call printhex16
-	;xchg ax,bx
 	push cx ;preserve CX
 	push dx ;preserve DX
 	;*** CHS magic
@@ -171,34 +164,11 @@ readblock: ;AX blocknumber, ES:BX addr, trashes AX (future return value)
 	mov ah,02h ;BIOS 13h read CHS block
 	mov al,1 ;sectors to read 1..128
 	mov dl,0 ;drive 0=A 80h=hdd0
-	;xchg ax,cx
-	;call printhex16
-	;xchg ax,cx
-	;xchg ax,dx
-	;call printhex16
-	;xchg ax,dx
 .retry:
 	push ax ;preserve AX for potential retries
-	;hlt
-	;push ax
-	;mov ah,0eh
-	;mov al,'%'
-	;int 10h
-	;pop ax
 	int 13h ;call BIOS function for disk operations
-	;push ax
-	;mov ah,0eh
-	;mov al,'?'
-	;int 10h
-	;pop ax
 	cmp ah,0 ;returned status, where 0 means OK
 	jne .error
-	;mov dx,es
-	;mov ds,dx
-	;mov ax,[bx]
-	;call printhex16
-	;mov dx,0
-	;mov ds,dx
 	pop ax ;free AX used for retries
 	pop dx ;restore DX
 	pop cx ;restore CX
