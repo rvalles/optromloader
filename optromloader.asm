@@ -22,7 +22,7 @@ start:
 	jz .good_header_magic
 	mov si,bad_header_magic_str
 	call printstr
-	call printhex16
+	call printhex16 ;magic value found in ROM header
 	jmp $ ;deadend infinite loop
 .good_header_magic:
 	;*** Obtain ROM size
@@ -31,17 +31,17 @@ start:
 	mov ah,0
 	mov al,[bootblock_end+2] ;load length from ROM header
 	mov bx,ax ;save length (blocks) into BX
-	call printhex8
+	call printhex8 ;length in blocks
 	mov si,romsizebytes_str
 	call printstr
 	mov cl,9 ;calculate ROM size in bytes: blocks*512
 	shl ax,cl ;in 8086, 1 or cl. 186+ for higher imm
-	call printhex16
+	call printhex16 ;length in bytes
 	;*** Adjust conventional/low memory size
 	mov si,ramsize_str
 	call printstr
 	int 12h ;get low mem size
-	call printhex16
+	call printhex16 ;low mem size
 	mov dx,bx ;recover rom length (blocks) from bx
 	inc dx ;round up to even
 	shr dx,1 ;512 blocks becomes 1KB blocks
@@ -49,7 +49,7 @@ start:
 	mov si,ramsizeafter_str
 	call printstr
 	int 12h ;get low mem size
-	call printhex16
+	call printhex16 ;new low mem size
 	;*** Setup ROM reading parameters
 	mov cl,6 ;segments are 2^4 bytes, low ram size in 2^10 bytes, thus <<6.
 	shl ax,cl ;in 8086, 1 or cl. 186+ for higher imm
@@ -63,7 +63,7 @@ start:
 	;hlt ;delay for debugging
 	inc dx ;increase target block. Needs to be 16bit, as image starts at 1
 	mov ax,dx ;block to seek to and read
-	call printhex8
+	call printhex8 ;block
 	call readblock
 	add bx,512 ;next target address += 1 blocksize
 	mov si,readblocksbs_str
@@ -80,7 +80,7 @@ start:
 	mov cl,9 ;calculate ROM size in bytes: blocks*512
 	shl dx,cl ;in 8086, 1 or cl. 186+ for higher imm
 	mov cx,dx ;put back in CX for later loop use
-	;DS:SI addr (single segment!), CX size. AX/Zflag if bad
+	;DS:SI addr, CX size (single segment!), AX/Zflag if bad
 	mov dl,0
 .checksum_loop:
 	lodsb
@@ -99,7 +99,7 @@ start:
 	call printstr
 	;sti ;some bad BIOSs disable on int13 and forget to restore
 .calloptrom:
-	call $CAFE:3 ;long jump. Segment placeholder gets replaced by mov above
+	call $CAFE:3 ;long call. Segment placeholder gets replaced by mov above
 	;*** Tell BIOS to try booting elsewhere
 	mov si,int19h_str
 	call printstr
@@ -188,7 +188,7 @@ readblock: ;AX blocknumber, ES:BX addr, trashes AX (future return value)
 	mov al,'E'
 	call printchar
 	mov al,ah ;status was returned in AH
-	call printhex8 ;print status value
+	call printhex8 ;status value
 	mov ah,0 ;reset command
 	mov dl,0 ;drive 0=A 80h=hdd0
 	int 13h ;call BIOS function for disk operations
