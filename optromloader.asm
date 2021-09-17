@@ -52,12 +52,12 @@ start:
 	int 12h ;get low mem size
 	call printhex16 ;new low mem size
 	;*** Read ROM image
+	mov si,readblocks_str
+	call printstr
 	mov cl,6 ;segments are 2^4 bytes, low ram size in 2^10 bytes, thus <<6.
 	shl ax,cl ;in 8086, 1 or cl. 186+ for higher imm
 	mov es,ax ;target segment
 	xor dx,dx ;block to read; will become 1 before reading
-	mov si,readblocks_str
-	call printstr
 	mov cx,bx ;recover rom length (blocks) from BX
 	xor bx,bx ;target address
 .readrom:
