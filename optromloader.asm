@@ -43,7 +43,7 @@ start:
 	call printstr
 	int 12h ;get low mem size
 	call printhex16 ;low mem size
-	mov dx,bx ;recover rom length (blocks) from bx
+	mov dx,bx ;recover rom length (blocks) from BX
 	inc dx ;round up to even
 	shr dx,1 ;512 blocks becomes 1KB blocks
 	sub [1043],dx ;store new low mem size into BIOS variable 40:0013
@@ -51,14 +51,14 @@ start:
 	call printstr
 	int 12h ;get low mem size
 	call printhex16 ;new low mem size
-	;*** Setup ROM reading parameters
+	;*** Read ROM image
 	mov cl,6 ;segments are 2^4 bytes, low ram size in 2^10 bytes, thus <<6.
 	shl ax,cl ;in 8086, 1 or cl. 186+ for higher imm
 	mov es,ax ;target segment
 	xor dx,dx ;block to read; will become 1 before reading
 	mov si,readblocks_str
 	call printstr
-	mov cx,bx ;recover rom length (blocks) from bx
+	mov cx,bx ;recover rom length (blocks) from BX
 	xor bx,bx ;target address
 .readrom:
 	;hlt ;delay for debugging
@@ -77,17 +77,17 @@ start:
 	xor si,si ;address of data to checksum. At start of segment
 	mov ax,es ;can't mov ES to DS directly
 	mov ds,ax ;DS now points to the rom we loaded earlier
-	mov dx,cx ;CX contains rom size in blocks
+	mov dx,cx ;recover rom length (blocks) from CX
 	mov cl,9 ;calculate ROM size in bytes: blocks*512
 	shl dx,cl ;in 8086, 1 or cl. 186+ for higher imm
 	mov cx,dx ;put back in CX for later loop use
 	;DS:SI addr, CX size (single segment!), AX/Zflag if bad
 	mov dl,0
 .checksum_loop:
-	lodsb
-	sub dl,al
+	lodsb ;SI++ -> al
+	sub dl,al ;checksum -= al
 	loop .checksum_loop
-	jz .checksum_good
+	jz .checksum_good ;checksum - storedchecksum (last byte) should be zero
 	mov si,checksum_bad_str
 	call printstr
 	jmp $ ;deadend infinite loop
