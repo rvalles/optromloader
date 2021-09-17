@@ -42,6 +42,7 @@ Booted from a floppy, it will load an Option ROM image into the end of conventio
 
 ## Caveats
 * ROM size cannot be over 64KB (one 8086 segment).
+* Option ROMs that make assumptions about their base address may not work.
 * Hardcoded to use the first floppy drive.
 
 ## Author
