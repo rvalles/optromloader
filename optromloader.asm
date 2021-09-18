@@ -34,16 +34,16 @@ start:
 	call printhex8 ;length in blocks
 	mov al,'|'
 	call printchar ;print a separator between blocks and bytes
-	mov ax,bx ;recover rom length (blocks) from BX
+	mov ax,bx ;recover ROM length (blocks) from BX
 	mov cl,9 ;calculate ROM size in bytes: blocks*512
-	shl ax,cl ;in 8086, 1 or cl. 186+ for higher imm
+	shl ax,cl ;in 8086, 1 or CL. 186+ for higher imm
 	call printhex16 ;length in bytes
 	;*** Adjust conventional/low memory size
 	mov si,ramsize_str
 	call printstr
 	int 12h ;get low mem size
 	call printhex16 ;low mem size
-	mov dx,bx ;recover rom length (blocks) from BX
+	mov dx,bx ;recover ROM length (blocks) from BX
 	inc dx ;round up to even
 	shr dx,1 ;512 blocks becomes 1KB blocks
 	sub [1043],dx ;store new low mem size into BIOS variable 40:0013
@@ -55,10 +55,10 @@ start:
 	mov si,readblocks_str
 	call printstr
 	mov cl,6 ;segments are 2^4 bytes, low ram size in 2^10 bytes, thus <<6.
-	shl ax,cl ;in 8086, 1 or cl. 186+ for higher imm
+	shl ax,cl ;in 8086, 1 or CL. 186+ for higher imm
 	mov es,ax ;target segment
 	xor dx,dx ;block to read; will become 1 before reading
-	mov cx,bx ;recover rom length (blocks) from BX
+	mov cx,bx ;recover ROM length (blocks) from BX
 	xor bx,bx ;target address
 .readrom:
 	;hlt ;delay for debugging
@@ -76,16 +76,16 @@ start:
 	call printstr
 	xor si,si ;address of data to checksum. At start of segment
 	mov ax,es ;can't mov ES to DS directly
-	mov ds,ax ;DS now points to the rom we loaded earlier
-	mov dx,cx ;recover rom length (blocks) from CX
+	mov ds,ax ;DS now points to the ROM we loaded earlier
+	mov dx,cx ;recover ROM length (blocks) from CX
 	mov cl,9 ;calculate ROM size in bytes: blocks*512
-	shl dx,cl ;in 8086, 1 or cl. 186+ for higher imm
+	shl dx,cl ;in 8086, 1 or CL. 186+ for higher imm
 	mov cx,dx ;put back in CX for later loop use
 	;DS:SI addr, CX size (single segment!), AX/Zflag if bad
 	mov dl,0
 .checksum_loop:
-	lodsb ;SI++ -> al
-	sub dl,al ;checksum -= al
+	lodsb ;load [SI++] into AL
+	sub dl,al ;checksum -= AL
 	loop .checksum_loop
 	jz .checksum_good ;checksum - storedchecksum (last byte) should be zero
 	mov si,checksum_bad_str
@@ -111,7 +111,7 @@ printchar: ;AL character to print
 	push bx ;preserve BX
 	push ax ;preserve AX
 	mov ah,0fh ;get current video state
-	int 10h ;bh is set to current page
+	int 10h ;BH is set to current page
 	mov bl,$7 ;light grey
 	pop ax ;restore AX
 	push ax ;preserve AX again
@@ -126,7 +126,7 @@ printstr: ;0:SI *str, ***zeroes DS***
 	mov ds,ax ;zero DS.
 	cld ;direction flag could have been set
 .printstr_loop:
-	lodsb ;SI++ -> al
+	lodsb ;load [SI++] into AL
 	test al,al ;are we done? (is character a NUL?)
 	jz .printstr_end
 	call printchar
