@@ -32,6 +32,13 @@ start:
 	mov al,[bootblock_end+2] ;load length from ROM header
 	mov bx,ax ;save length (blocks) into BX
 	call printhex8 ;length in blocks
+	cmp al,0 ;length shouldn't be zero.
+	jnz .good_length
+	mov si,bad_str
+	call printstr
+	jmp $ ;deadend infinite loop
+.good_length:
+	;*** Print ROM size in bytes
 	mov al,'|'
 	call printchar ;print a separator between blocks and bytes
 	mov ax,bx ;recover ROM length (blocks) from BX
@@ -88,11 +95,11 @@ start:
 	sub dl,al ;checksum -= AL
 	loop .checksum_loop
 	jz .checksum_good ;checksum - storedchecksum (last byte) should be zero
-	mov si,checksum_bad_str
+	mov si,bad_str
 	call printstr
 	jmp $ ;deadend infinite loop
 .checksum_good:
-	mov si,checksum_good_str
+	mov si,ok_str
 	call printstr
 	;*** Call ROM image entrypoint
 	mov [.calloptrom+3],es ;replace target segment in long call
@@ -208,8 +215,8 @@ readblocksbs_str: db 8,8,0
 rominit_str: db 13,10,"ROMInit.",0
 int19h_str: db "int19h.",0
 checksum_str: db 13,10,"Ck+",0
-checksum_bad_str: db "BAD!",0
-checksum_good_str: db "OK",0
+bad_str: db "BAD!",0
+ok_str: db "OK",0
 .finalize_bootblock:
 	times 510-($-$$) db $cc ;int3, a breakpoint. Better results should IP end up pointing here.
 	dw $AA55
