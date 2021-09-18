@@ -38,13 +38,6 @@ start:
 	call printstr
 	jmp $ ;deadend infinite loop
 .good_length:
-	;*** Print ROM size in bytes
-	mov al,'|'
-	call printchar ;print a separator between blocks and bytes
-	mov ax,bx ;recover ROM length (blocks) from BX
-	mov cl,9 ;calculate ROM size in bytes: blocks*512
-	shl ax,cl ;in 8086, 1 or CL. 186+ for higher imm
-	call printhex16 ;length in bytes
 	;*** Adjust conventional/low memory size
 	mov si,ramsize_str
 	call printstr
