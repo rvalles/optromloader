@@ -31,7 +31,7 @@ fd360.img: optromloader9 optrom.bin
 	cat optromloader9 optrom.bin >pad.bin && dd bs=368640 conv=sync if=pad.bin of=$@
 	rm -f pad.bin
 testrom.bin: testrom.asm
-	@echo "*** building $@ (not signed)..."
+	@echo "*** assembling $@ (not signed)..."
 	$(fasm) testrom.asm $@
 	$(hexdumpcmd) $@
 .PHONY: clean
