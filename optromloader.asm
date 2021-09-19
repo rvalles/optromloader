@@ -11,6 +11,7 @@ start:
 	xor ax,ax
 	mov ss,ax ;handed-over SS could be anything, like CS
 	mov ds,ax ;DS can't be trusted either
+	mov es,ax ;ES isn't any more trustworthy
 	mov si,banner_str
 	call printstr
 	;*** Load first block of ROM image (containing ROM header)
