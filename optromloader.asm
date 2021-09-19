@@ -65,7 +65,6 @@ start:
 	;hlt ;delay for debugging
 	inc dx ;increase target block. Needs to be 16bit, as image starts at 1
 	mov ax,dx ;block to seek to and read
-	mov di,readblock_tries ;how many read attempts before giving up
 	call printhex8 ;block
 	call readblock
 	add bx,512 ;next target address += 1 blocksize
@@ -161,7 +160,7 @@ _printhexdigits: ;intentional fallthrough
 	pop ax ;restore AX
 	pop cx ;restore CX
 	ret
-readblock: ;AX blockno, [ES:BX] dest, DI tries, trashes AX (reserved, retval)
+readblock: ;AX blockno, [ES:BX] dest, trashes AX (reserved, retval)
 	push cx ;preserve CX
 	push dx ;preserve DX
 	;*** CHS magic
@@ -178,6 +177,7 @@ readblock: ;AX blockno, [ES:BX] dest, DI tries, trashes AX (reserved, retval)
 	mov ah,02h ;BIOS 13h read CHS block
 	mov al,1 ;sectors to read 1..128
 	mov dl,0 ;drive 0=A 80h=hdd0
+	mov di,readblock_tries ;how many read attempts before giving up
 .retry:
 	push ax ;preserve AX for potential retries
 	int 13h ;call BIOS function for disk operations
