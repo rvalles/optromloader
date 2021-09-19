@@ -227,3 +227,9 @@ ok_str: db "OK",0
 	times 510-($-$$) db $cc ;int3, a breakpoint. Better results should IP end up pointing here.
 	dw $AA55
 bootblock_end:
+if defined include_optrom
+	file include_optrom
+end if
+if defined pad_to_bytes
+	times pad_to_bytes-($-$$) db $cc ;int3, a breakpoint. Better results should IP end up pointing here.
+end if

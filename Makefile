@@ -14,22 +14,18 @@ optromloader15: optromloader.asm
 optromloader9: optromloader.asm
 	@echo "*** assembling $@..."
 	$(fasm) -d build_date=$(date) -d sectors_per_track=9 optromloader.asm $@
-fd1440.img: optromloader18 optrom.bin
-	@echo "*** building $@..."
-	cat optromloader18 optrom.bin >pad.bin && dd bs=1474560 conv=sync if=pad.bin of=$@
-	rm -f pad.bin
-fd720.img: optromloader9 optrom.bin
-	@echo "*** building $@..."
-	cat optromloader9 optrom.bin >pad.bin && dd bs=737280 conv=sync if=pad.bin of=$@
-	rm -f pad.bin
-fd1200.img: optromloader15 optrom.bin
-	@echo "*** building $@..."
-	cat optromloader15 optrom.bin >pad.bin && dd bs=1228800 conv=sync if=pad.bin of=$@
-	rm -f pad.bin
-fd360.img: optromloader9 optrom.bin
-	@echo "*** building $@..."
-	cat optromloader9 optrom.bin >pad.bin && dd bs=368640 conv=sync if=pad.bin of=$@
-	rm -f pad.bin
+fd1440.img: optromloader.asm optrom.bin
+	@echo "*** assembling $@..."
+	$(fasm) -d build_date=$(date) -d sectors_per_track=18 -d pad_to_bytes=1474560 -d include_optrom="'optrom.bin'" optromloader.asm $@
+fd720.img: optromloader.asm optrom.bin
+	@echo "*** assembling $@..."
+	$(fasm) -d build_date=$(date) -d sectors_per_track=9 -d pad_to_bytes=737280 -d include_optrom="'optrom.bin'" optromloader.asm $@
+fd1200.img: optromloader.asm optrom.bin
+	@echo "*** assembling $@..."
+	$(fasm) -d build_date=$(date) -d sectors_per_track=15 -d pad_to_bytes=1228800 -d include_optrom="'optrom.bin'" optromloader.asm $@
+fd360.img: optromloader.asm optrom.bin
+	@echo "*** assembling $@..."
+	$(fasm) -d build_date=$(date) -d sectors_per_track=9 -d pad_to_bytes=368640 -d include_optrom="'optrom.bin'" optromloader.asm $@
 testrom.bin: testrom.asm
 	@echo "*** assembling $@ (not signed)..."
 	$(fasm) testrom.asm $@
@@ -37,7 +33,7 @@ testrom.bin: testrom.asm
 .PHONY: clean
 clean:
 	@echo "*** Removing build artifacts..."
-	rm -f optromloader9 optromloader15 optromloader18 fd1440.img fd720.img fd1200.img fd360.img pad.bin testrom.bin
+	rm -f optromloader9 optromloader15 optromloader18 fd1440.img fd720.img fd1200.img fd360.img testrom.bin
 .PHONY: hexdump
 hexdump: optromloader18
 	@echo "*** hexdump optromloader18..."
