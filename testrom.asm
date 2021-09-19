@@ -1,9 +1,10 @@
 format binary as "raw"
 use16
 delayticks=19 ;at least a second
+rom_length=128 ;length in 512 byte blocks
 org 0
 dw $AA55 ;rom magic
-db 1 ;length in 512 byte blocks
+db rom_length
 start: ;assume sane stack, which means sane SS and SP
 	mov bx,ds ;save entry DS
 	mov ax,cs
@@ -73,5 +74,5 @@ hello_str:
 bye_str:
 	db "EndTest.",0
 .finalize_optrom:
-	times 511-($-$$) db $cc ;int3, a breakpoint. Better results should IP end up pointing here.
+	times 512*rom_length-($-$$)-1 db $cc ;int3, a breakpoint. Better results should IP end up pointing here.
 	db $00 ;signature
