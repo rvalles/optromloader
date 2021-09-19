@@ -1,6 +1,6 @@
 fasm = fasm
-#hexdumpcmd = hexdump -C
-hexdumpcmd = xxd -a
+hexdumpcmd = hexdump -C
+#hexdumpcmd = xxd -a
 qemu = qemu-system-i386
 date = \"`date -u +%Y%m%d%H%MZ`\"
 .PHONY: all
