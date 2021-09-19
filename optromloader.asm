@@ -166,7 +166,7 @@ readblock: ;AX blockno, [ES:BX] dest, trashes AX (reserved, retval)
 	push di ;preserve DI
 	;*** CHS magic
 	;tracks>>1 is cyl, tracks&1 is head
-	mov dl,sectorspertrack ;get number of tracks
+	mov dl,sectors_per_track ;get number of tracks
 	div dl ;ax/dl -> /al, %ah
 	mov dh,1 ;tracks&1 is head
 	and dh,al ;CHS head 0..15 (0 or 1 for floppy)

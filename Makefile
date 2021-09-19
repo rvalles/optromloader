@@ -7,13 +7,13 @@ date = \"`date -u +%Y%m%d%H%MZ`\"
 all: optromloader18 optromloader15 optromloader9 fd1440.img fd720.img fd1200.img fd360.img hexdump
 optromloader18: optromloader.asm
 	@echo "*** assembling $@..."
-	$(fasm) -d date=$(date) -d sectorspertrack=18 optromloader.asm $@
+	$(fasm) -d date=$(date) -d sectors_per_track=18 optromloader.asm $@
 optromloader15: optromloader.asm
 	@echo "*** assembling $@..."
-	$(fasm) -d date=$(date) -d sectorspertrack=15 optromloader.asm $@
+	$(fasm) -d date=$(date) -d sectors_per_track=15 optromloader.asm $@
 optromloader9: optromloader.asm
 	@echo "*** assembling $@..."
-	$(fasm) -d date=$(date) -d sectorspertrack=9 optromloader.asm $@
+	$(fasm) -d date=$(date) -d sectors_per_track=9 optromloader.asm $@
 fd1440.img: optromloader18 optrom.bin
 	@echo "*** building $@..."
 	cat optromloader18 optrom.bin >pad.bin && dd bs=1474560 conv=sync if=pad.bin of=$@
