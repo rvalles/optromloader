@@ -210,7 +210,7 @@ readblock: ;AX blockno, [ES:BX] dest, trashes AX (reserved, retval)
 	mov si,bad_str
 	call printstr
 	jmp $ ;infinite loop deadend
-banner_str: db "optromloader, by Roc Valles Domenech, built ",date,'.',13,10,0
+banner_str: db "optromloader, by Roc Valles Domenech, built ",build_date,'.',13,10,0
 bad_header_magic_str: db "Ehdr:",0
 romsize_str: db "ROM blks:",0
 ramsize_str: db 13,10,"RAM:",0
