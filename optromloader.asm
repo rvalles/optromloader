@@ -163,6 +163,7 @@ _printhexdigits: ;intentional fallthrough
 readblock: ;AX blockno, [ES:BX] dest, trashes AX (reserved, retval)
 	push cx ;preserve CX
 	push dx ;preserve DX
+	push di ;preserve DI
 	;*** CHS magic
 	;tracks>>1 is cyl, tracks&1 is head
 	mov dl,sectorspertrack ;get number of tracks
@@ -184,6 +185,7 @@ readblock: ;AX blockno, [ES:BX] dest, trashes AX (reserved, retval)
 	cmp ah,0 ;returned status, where 0 means OK
 	jne .error
 	pop ax ;free AX used for retries
+	pop di ;restore DI
 	pop dx ;restore DX
 	pop cx ;restore CX
 	ret
