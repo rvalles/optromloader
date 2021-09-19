@@ -3,6 +3,7 @@
 ;https://www.rvalles.net
 format binary as "raw"
 use16
+readblock_tries=5 ;use FDD with care
 org 7C00h ;fixed bootloader load address
 jmp 0x0000:start ;ensure CS is zero
 start:
@@ -64,6 +65,7 @@ start:
 	;hlt ;delay for debugging
 	inc dx ;increase target block. Needs to be 16bit, as image starts at 1
 	mov ax,dx ;block to seek to and read
+	mov di,readblock_tries ;how many read attempts before giving up
 	call printhex8 ;block
 	call readblock
 	add bx,512 ;next target address += 1 blocksize
@@ -159,7 +161,7 @@ _printhexdigits: ;intentional fallthrough
 	pop ax ;restore AX
 	pop cx ;restore CX
 	ret
-readblock: ;AX blocknumber, ES:BX addr, trashes AX (future return value)
+readblock: ;AX blockno, [ES:BX] dest, DI tries, trashes AX (reserved, retval)
 	push cx ;preserve CX
 	push dx ;preserve DX
 	;*** CHS magic
@@ -195,8 +197,17 @@ readblock: ;AX blocknumber, ES:BX addr, trashes AX (future return value)
 	int 13h ;call BIOS function for disk operations
 	mov si,readblocks_str
 	call printstr ;reprint header in next line to preserve read error on screen
+	mov ax,'_' ;pad character
+	call printchar ;pad output for block number
+	call printchar ;2 nibbles
+	dec di ;decrement tries left
+	jz .fail ;enough attempts
 	pop ax ;restore AX containing parameters for retry
 	jmp .retry ;retry reading sector
+.fail:
+	mov si,bad_str
+	call printstr
+	jmp $ ;infinite loop deadend
 banner_str: db "optromloader, by Roc Valles Domenech, built ",date,'.',13,10,0
 bad_header_magic_str: db "Ehdr:",0
 romsize_str: db "ROM blks:",0
