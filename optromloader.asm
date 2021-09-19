@@ -7,9 +7,9 @@ readblock_tries=5 ;use FDD with care
 org 7C00h ;fixed bootloader load address
 	jmp 0x0000:start ;ensure CS is zero
 start:
-	mov sp,$7C00 ;set a stack right under the bootloader
 	xor ax,ax
 	mov ss,ax ;handed-over SS could be anything, like CS
+	mov sp,$7C00 ;set a stack right under the bootloader
 	mov ds,ax ;DS can't be trusted either
 	mov es,ax ;ES isn't any more trustworthy
 	mov si,banner_str
