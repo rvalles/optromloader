@@ -30,10 +30,14 @@ fd360.img: optromloader9 optrom.bin
 	@echo "*** building $@..."
 	cat optromloader9 optrom.bin >pad.bin && dd bs=368640 conv=sync if=pad.bin of=$@
 	rm -f pad.bin
+testrom.bin: testrom.asm
+	@echo "*** building $@ (not signed)..."
+	$(fasm) testrom.asm $@
+	$(hexdumpcmd) $@
 .PHONY: clean
 clean:
 	@echo "*** Removing build artifacts..."
-	rm -f optromloader9 optromloader15 optromloader18 fd1440.img fd720.img fd1200.img fd360.img pad.bin
+	rm -f optromloader9 optromloader15 optromloader18 fd1440.img fd720.img fd1200.img fd360.img pad.bin testrom.bin
 .PHONY: hexdump
 hexdump: optromloader18
 	@echo "*** hexdump optromloader18..."
