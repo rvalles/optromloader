@@ -103,7 +103,7 @@ start:
 	call $CAFE:3 ;long call. Segment placeholder gets replaced by mov above
 	;*** Tell BIOS to try booting elsewhere
 	mov si,int19h_str
-	call printstr
+	call printstr ;also does zero DS. Option ROM could have changed it.
 	int 19h ;try next boot device (some BIOSs will reboot if none left)
 	;int 19h shouldn't return, so this shouldn't be reached
 ;*****************************************************************************
