@@ -38,7 +38,7 @@ start:
 	mov al,[bootblock_end+2] ;load length from ROM header
 	mov bx,ax ;save length (blocks) into BX
 	call printhex8 ;length in blocks
-	cmp al,0 ;length shouldn't be zero.
+	cmp al,0 ;length shouldn't be zero
 	jnz .good_length
 	jmp badend
 .good_length:
@@ -50,10 +50,10 @@ if ~ defined target_segment
 	int 12h ;get mem size
 	sub ax,dx ;calculate remaining conventional memory
 	jnc .mem_ok ;no underflow
-	xor ax,ax ;conventional memory left at 0 is code for "no ram left".
+	xor ax,ax ;conventional memory left at 0 is code for "no ram left"
 .mem_ok:
 	mov [1043],ax ;store new low mem size into BIOS variable 40:0013
-	mov cl,6 ;segments are 2^4 bytes, low ram size in 2^10 bytes, thus <<6.
+	mov cl,6 ;segments are 2^4 bytes, low ram size in 2^10 bytes, thus <<6
 	shl ax,cl ;in 8086, 1 or CL. 186+ for higher imm
 else
 	mov ax,target_segment
@@ -235,12 +235,12 @@ checksum_str: db 13,10,"Ck+",0
 bad_str: db "!BAD",0
 ok_str: db "OK",0
 .finalize_bootblock:
-	times 510-($-$$) db $cc ;int3, a breakpoint. Better results should IP end up pointing here.
+	times 510-($-$$) db $cc ;int3, a breakpoint. Better results should IP end up pointing here
 	dw $AA55
 bootblock_end:
 if defined include_optrom
 	file include_optrom
 end if
 if defined pad_to_bytes
-	times pad_to_bytes-($-$$) db $cc ;int3, a breakpoint. Better results should IP end up pointing here.
+	times pad_to_bytes-($-$$) db $cc ;int3, a breakpoint. Better results should IP end up pointing here
 end if
