@@ -29,7 +29,7 @@ start:
 	mov si,bad_header_magic_str
 	call printstr
 	call printhex16 ;magic value found in ROM header
-	jmp $ ;deadend infinite loop
+	jmp badend
 .good_header_magic:
 	;*** Obtain ROM size
 	mov si,romsize_str
@@ -40,9 +40,7 @@ start:
 	call printhex8 ;length in blocks
 	cmp al,0 ;length shouldn't be zero.
 	jnz .good_length
-	mov si,bad_str
-	call printstr
-	jmp $ ;deadend infinite loop
+	jmp badend
 .good_length:
 	;*** Adjust conventional/low memory size
 if ~ defined target_segment
@@ -52,24 +50,22 @@ if ~ defined target_segment
 	int 12h ;get mem size
 	sub ax,dx ;calculate remaining conventional memory
 	jnc .mem_ok ;no underflow
-    xor ax,ax ;conventional memory left at 0 is code for "no ram left".
+	xor ax,ax ;conventional memory left at 0 is code for "no ram left".
 .mem_ok:
-    mov [1043],ax ;store new low mem size into BIOS variable 40:0013
+	mov [1043],ax ;store new low mem size into BIOS variable 40:0013
 	mov cl,6 ;segments are 2^4 bytes, low ram size in 2^10 bytes, thus <<6.
 	shl ax,cl ;in 8086, 1 or CL. 186+ for higher imm
 else
 	mov ax,target_segment
 end if
-    ;*** Set up target segment
-    mov si,segment_str
-    call printstr
-    call printhex16 ;target segment
+	;*** Set up target segment
+	mov si,segment_str
+	call printstr
+	call printhex16 ;target segment
 	mov es,ax ;target segment
 	cmp ax,$0800 ;bootloader entrypoint + 2 blocks, >>4 because segment
 	jae .segment_ok ;not clobbering this bootloader (A20 wrap not considered)
-	mov si,bad_str
-	call printstr
-	jmp $ ;deadend infinite loop
+	jmp badend
 .segment_ok:
 	;*** Read ROM image
 	mov si,readblocks_str
@@ -105,9 +101,7 @@ end if
 	sub dl,al ;checksum -= AL
 	loop .checksum_loop
 	jz .checksum_good ;checksum - storedchecksum (last byte) should be zero
-	mov si,bad_str
-	call printstr
-	jmp $ ;deadend infinite loop
+	jmp badend
 .checksum_good:
 	mov si,ok_str
 	call printstr
@@ -124,6 +118,10 @@ end if
 	int 19h ;try next boot device (some BIOSs will reboot if none left)
 	;int 19h shouldn't return, so this shouldn't be reached
 ;*****************************************************************************
+badend:
+	mov si,bad_str
+	call printstr
+	jmp $ ;infinite loop deadend
 printchar: ;AL character to print
 	push bx ;preserve BX
 	push ax ;preserve AX
@@ -219,15 +217,13 @@ readblock: ;AX blockno, [ES:BX] dest, trashes AX (reserved, retval)
 	call printchar ;pad output for block number
 	call printchar ;2 nibbles
 	dec di ;decrement tries left
-	jz .fail ;enough attempts
+	jnz .canretry
+	jmp badend ;enough attempts
+.canretry:
 	pop ax ;restore AX containing parameters for retry
 	jmp .retry ;retry reading sector
-.fail:
-	mov si,bad_str
-	call printstr
-	jmp $ ;infinite loop deadend
 banner_str: db "optromloader, by Roc Valles Domenech, built ",build_date,'.',13,10,0
-bad_header_magic_str: db "Ehdr:",0
+bad_header_magic_str: db "Mgk:",0
 romsize_str: db "ROM blks:",0
 segment_str: db " Seg:",0
 readblocks_str: db 13,10,"Rd:",0
@@ -236,7 +232,7 @@ readblocksbs_str: db 8,8,0
 rominit_str: db 13,10,"ROMInit.",0
 int19h_str: db "int19h.",0
 checksum_str: db 13,10,"Ck+",0
-bad_str: db "BAD!",0
+bad_str: db "!BAD",0
 ok_str: db "OK",0
 .finalize_bootblock:
 	times 510-($-$$) db $cc ;int3, a breakpoint. Better results should IP end up pointing here.
