@@ -229,11 +229,11 @@ segment_str: db " Seg:",0
 readblocks_str: db 13,10,"Rd:",0
 readblocksbs_str: db 8,8,0
 ;readblocksbs_str: db 13,10,"Rd+",0
-rominit_str: db 13,10,"ROMInit.",0
+rominit_str: db "Init.",0
 int19h_str: db "int19h.",0
 checksum_str: db 13,10,"Ck+",0
 bad_str: db "!BAD",0
-ok_str: db "OK",0
+ok_str: db "OK.",0
 .finalize_bootblock:
 	times 510-($-$$) db $cc ;int3, a breakpoint. Better results should IP end up pointing here
 	dw $AA55
