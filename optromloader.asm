@@ -45,19 +45,11 @@ start:
 	jmp $ ;deadend infinite loop
 .good_length:
 	;*** Adjust conventional/low memory size
-	mov si,ramsize_str
-	call printstr
-	int 12h ;get low mem size
-	call printhex16 ;low mem size
 if ~ defined target_segment
 	mov dx,bx ;recover ROM length (blocks) from BX
 	inc dx ;round up to even
 	shr dx,1 ;512 blocks becomes 1KB blocks
 	sub [1043],dx ;store new low mem size into BIOS variable 40:0013
-	mov si,ramsizeafter_str
-	call printstr
-	int 12h ;get low mem size
-	call printhex16 ;new low mem size
 end if
 	;*** Read ROM image
 	mov si,readblocks_str
@@ -65,6 +57,7 @@ end if
 if defined target_segment
 	mov ax,target_segment
 else
+    int 12h ;get low mem size
 	mov cl,6 ;segments are 2^4 bytes, low ram size in 2^10 bytes, thus <<6.
 	shl ax,cl ;in 8086, 1 or CL. 186+ for higher imm
 end if
@@ -224,8 +217,6 @@ readblock: ;AX blockno, [ES:BX] dest, trashes AX (reserved, retval)
 banner_str: db "optromloader, by Roc Valles Domenech, built ",build_date,'.',13,10,0
 bad_header_magic_str: db "Ehdr:",0
 romsize_str: db "ROM blks:",0
-ramsize_str: db 13,10,"RAM:",0
-ramsizeafter_str: db "->",0
 readblocks_str: db 13,10,"Rd:",0
 readblocksbs_str: db 8,8,0
 ;readblocksbs_str: db 13,10,"Rd+",0
