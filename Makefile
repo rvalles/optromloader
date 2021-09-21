@@ -1,5 +1,5 @@
 fasm = fasm
-fasm_extraopts = -p 2
+fasm_extraopts =
 #fasm_extraopts += -d target_segment=0xE000
 readblock_retries = 7
 hexdumpcmd = hexdump -C
