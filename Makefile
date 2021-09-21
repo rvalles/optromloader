@@ -21,7 +21,7 @@ optromloader9: optromloader.asm
 	$(fasm) $(fasm_extraopts) -d sectors_per_track=9 optromloader.asm $@
 fd1440.img: optromloader.asm optrom.bin
 	@echo "*** assembling $@..."
-	$(fasm) $(fasm_extraopts) -d sectors_per_track=19 -d pad_to_bytes=1474560 -d include_optrom="'optrom.bin'" optromloader.asm $@
+	$(fasm) $(fasm_extraopts) -d sectors_per_track=18 -d pad_to_bytes=1474560 -d include_optrom="'optrom.bin'" optromloader.asm $@
 fd720.img: optromloader.asm optrom.bin
 	@echo "*** assembling $@..."
 	$(fasm) $(fasm_extraopts) -d sectors_per_track=9 -d pad_to_bytes=737280 -d include_optrom="'optrom.bin'" optromloader.asm $@
