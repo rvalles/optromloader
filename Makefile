@@ -1,11 +1,13 @@
 fasm = fasm
 fasm_extraopts = -p 2
 #fasm_extraopts += -d target_segment=0xE000
+readblock_retries = 7
 hexdumpcmd = hexdump -C
 #hexdumpcmd = xxd -a
 qemu = qemu-system-i386
 date = \"`date -u +%Y%m%d%H%MZ`\"
 fasm_extraopts += -d build_date=$(date)
+fasm_extraopts += -d readblock_retries=$(readblock_retries)
 .PHONY: all
 all: optromloader18 optromloader15 optromloader9 fd1440.img fd720.img fd1200.img fd360.img hexdump
 optromloader18: optromloader.asm
