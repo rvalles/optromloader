@@ -49,19 +49,31 @@ if ~ defined target_segment
 	mov dx,bx ;recover ROM length (blocks) from BX
 	inc dx ;round up to even
 	shr dx,1 ;512 blocks becomes 1KB blocks
-	sub [1043],dx ;store new low mem size into BIOS variable 40:0013
+	int 12h ;get mem size
+	sub ax,dx ;calculate remaining conventional memory
+	jnc .mem_ok ;no underflow
+    xor ax,ax ;conventional memory left at 0 is code for "no ram left".
+.mem_ok:
+    mov [1043],ax ;store new low mem size into BIOS variable 40:0013
+	mov cl,6 ;segments are 2^4 bytes, low ram size in 2^10 bytes, thus <<6.
+	shl ax,cl ;in 8086, 1 or CL. 186+ for higher imm
+else
+	mov ax,target_segment
 end if
+    ;*** Set up target segment
+    mov si,segment_str
+    call printstr
+    call printhex16 ;target segment
+	mov es,ax ;target segment
+	cmp ax,$0800 ;bootloader entrypoint + 2 blocks, >>4 because segment
+	jae .segment_ok ;not clobbering this bootloader (A20 wrap not considered)
+	mov si,bad_str
+	call printstr
+	jmp $ ;deadend infinite loop
+.segment_ok:
 	;*** Read ROM image
 	mov si,readblocks_str
 	call printstr
-if defined target_segment
-	mov ax,target_segment
-else
-    int 12h ;get low mem size
-	mov cl,6 ;segments are 2^4 bytes, low ram size in 2^10 bytes, thus <<6.
-	shl ax,cl ;in 8086, 1 or CL. 186+ for higher imm
-end if
-	mov es,ax ;target segment
 	xor dx,dx ;block to read; will become 1 before reading
 	mov cx,bx ;recover ROM length (blocks) from BX
 	xor bx,bx ;target address
@@ -217,6 +229,7 @@ readblock: ;AX blockno, [ES:BX] dest, trashes AX (reserved, retval)
 banner_str: db "optromloader, by Roc Valles Domenech, built ",build_date,'.',13,10,0
 bad_header_magic_str: db "Ehdr:",0
 romsize_str: db "ROM blks:",0
+segment_str: db " Seg:",0
 readblocks_str: db 13,10,"Rd:",0
 readblocksbs_str: db 8,8,0
 ;readblocksbs_str: db 13,10,"Rd+",0
