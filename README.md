@@ -2,7 +2,7 @@
 
 Booted from a floppy, it will load an Option ROM image into the end of conventional memory.
 
-![PCem IBM PC screenshot](https://b.rvalles.net/unsorted/pcem_ibmpc_optromboot_xtide.png)
+![PCem Amstrad PC1512 screenshot](https://b.rvalles.net/unsorted/pcem_pc1512_optromboot_1.2.0_xtide.png)
 
 ## Use cases (non-exhaustive)
 * Test boot ROMs before burning them.
@@ -14,6 +14,8 @@ Booted from a floppy, it will load an Option ROM image into the end of conventio
 * Pure 8086 code.
 * Fits in a floppy bootblock.
 * Verifies ROM image checksum after loading.
+* Reserves memory from top of conventional memory.
+  * Alternatively allows specifying target segment (upper area possible).
 * Works on PC/XT/AT and clones.
   * Also works on newer hardware, such as the 486 with AMI BIOS I wrote it for.
 * Trivial to use. Concatenate loader and the ROM image, write into floppy.
@@ -29,6 +31,9 @@ Booted from a floppy, it will load an Option ROM image into the end of conventio
     * Qemu provides a python tool to sign ROMs:
         * https://github.com/qemu/qemu/blob/master/scripts/signrom.py
     * For XTIDE Universal BIOS ROMs, use its XTIDECFG tool to configure and sign ROM images.
+* Optionally review Makefile for advanced usage.
+  * If specifying target segment in upper memory, ensure it is visible as memory in BIOS settings.
+    * `through-486` works on my AMI BIOS 486.
 * Run `make`.
 * Floppy images will be created (fd*.img).
 * Optionally test 1.44M image with qemu: `make emulate`.
