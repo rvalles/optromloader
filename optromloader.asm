@@ -202,7 +202,7 @@ readblock: ;AX blockno, [ES:BX] dest, trashes AX (reserved, retval)
 	mov cl,ah ;CHS sector in LSB, cyl MSB (zero) in MSB
 	mov ah,02h ;BIOS 13h read CHS block
 	mov al,1 ;sectors to read 1..128
-	mov dl,0 ;drive 0=A 80h=hdd0
+	mov dl,bios_drive ;drive 0=A 80h=hdd0
 	mov di,readblock_tries ;how many read attempts before giving up
 .retry:
 	push ax ;preserve AX for potential retries
@@ -220,7 +220,7 @@ readblock: ;AX blockno, [ES:BX] dest, trashes AX (reserved, retval)
 	mov al,ah ;status was returned in AH
 	call printhex8 ;status value
 	mov ah,0 ;reset command
-	mov dl,0 ;drive 0=A 80h=hdd0
+	mov dl,bios_drive ;drive 0=A 80h=hdd0
 	int 13h ;call BIOS function for disk operations
 	mov si,readblocks_str
 	call printstr ;reprint header in next line to preserve read error on screen
