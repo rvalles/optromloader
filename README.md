@@ -14,6 +14,8 @@ Booted from a floppy, it will load an Option ROM image into the end of conventio
 * Pure 8086 code.
 * Fits in a floppy bootblock.
 * Verifies ROM image checksum after loading.
+* Supports all Option ROM sizes. Spec goes up to 127.5KB, but full 128KB ROMs are supported.
+  * An extra block is read when length=255 (127.5KB/128KB case).
 * Reserves memory from top of conventional memory.
   * Alternatively allows specifying target segment (upper area possible).
 * Works on PC/XT/AT and clones.
@@ -32,6 +34,7 @@ Booted from a floppy, it will load an Option ROM image into the end of conventio
         * https://github.com/qemu/qemu/blob/master/scripts/signrom.py
     * For XTIDE Universal BIOS ROMs, use its XTIDECFG tool to configure and sign ROM images.
 * Optionally review Makefile for advanced usage.
+  * If boot floppy drive won't be `A:`, set `bios_drive` value appropriately.
   * If specifying target segment in upper memory, ensure it is visible as memory in BIOS settings.
     * `through-486` works on my AMI BIOS 486.
 * Run `make`.
@@ -46,9 +49,7 @@ Booted from a floppy, it will load an Option ROM image into the end of conventio
   * pad to floppy size.
 
 ## Caveats
-* ROM size cannot be over 64KB (one 8086 segment).
-* Option ROMs that make assumptions about their base address may not work.
-* Hardcoded to use the first floppy drive.
+* Option ROMs that make assumptions about their base address may not work if loaded into a different address.
 
 ## Author
 Roc Vallès Domènech
