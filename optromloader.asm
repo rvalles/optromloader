@@ -62,7 +62,8 @@ end if
 	mov si,segment_str
 	call printstr
 	call printhex16 ;target segment
-	mov es,ax ;target segment
+	mov bp,ax ;saved for later
+	mov es,bp ;target segment
 	cmp ax,$0800 ;bootloader entrypoint + 2 blocks, >>4 because segment
 	jae .segment_ok ;not clobbering this bootloader (A20 wrap not considered)
 	jmp badend
@@ -94,26 +95,29 @@ end if
 	;*** Verify checksum
 	mov si,checksum_str
 	call printstr
-	xor si,si ;address of data to checksum. At start of segment
-	mov ax,es ;can't mov ES to DS directly
-	mov ds,ax ;DS now points to the ROM we loaded earlier
-	mov dx,cx ;recover ROM length (blocks) from CX
-	mov cl,9 ;calculate ROM size in bytes: blocks*512
-	shl dx,cl ;in 8086, 1 or CL. 186+ for higher imm
-	mov cx,dx ;put back in CX for later loop use
-	;DS:SI addr, CX size (single segment!), AX/Zflag if bad
-	mov dl,0
-.checksum_loop:
+	mov di,bp ;revover target segment from BP
+	mov bl,cl ;recover ROM length (blocks) from CL
+.single_segment:
+	mov dl,0 ;checksum initialized with value 0
+.checksum_nextblock:
+	mov ds,di ;DS now points to the block we're about to checksum
+	mov cx,512 ;size of a block, as we deal with one block at a time
+	xor si,si ;at start of segment
+.checksum_loop: ;DS:SI addr, CX size (single segment!), AX/Zflag if bad
 	lodsb ;load [SI++] into AL
 	sub dl,al ;checksum -= AL
 	loop .checksum_loop
-	jz .checksum_good ;checksum - storedchecksum (last byte) should be zero
+	add di,$20 ;advance 512 bytes via segment.
+	dec bl ;blocksleft-=1
+	jnz .checksum_nextblock
+	cmp dl,0 ;checksum - storedchecksum (last byte) should be zero
+	jz .checksum_good
 	jmp badend
 .checksum_good:
 	mov si,ok_str
 	call printstr
 	;*** Call ROM image entrypoint
-	mov [.calloptrom+3],es ;replace target segment in long call
+	mov [.calloptrom+3],bp ;replace target segment in long call
 	mov si,rominit_str
 	call printstr
 	sti ;some bad BIOSs disable interrupts on int 13h
