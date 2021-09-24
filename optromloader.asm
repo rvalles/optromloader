@@ -5,8 +5,8 @@ format binary as "raw"
 use16
 ;8086 conditional branches must be rel8
 macro jcc8086 opcode,dest {
-	assert dest - $ - 2 >= -128
-	assert dest - $ - 2 <= 127
+	assert dest-$-2 >= -128
+	assert dest-$-2 <= 127
 	opcode dest
 }
 if defined readblock_retries
