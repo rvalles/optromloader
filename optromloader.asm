@@ -3,6 +3,12 @@
 ;https://www.rvalles.net
 format binary as "raw"
 use16
+;8086 conditional branches must be rel8
+macro jcc8086 opcode,dest {
+	assert dest - $ - 2 >= -128
+	assert dest - $ - 2 <= 127
+	opcode dest
+}
 if defined readblock_retries
 readblock_tries=readblock_retries+1
 else
@@ -25,7 +31,7 @@ start:
 	;*** Check ROM magic value
 	mov ax,[bootblock_end] ;load magic value from ROM header
 	cmp ax,$AA55 ;expected value
-	jz .good_header_magic
+	jcc8086 jz,.good_header_magic
 	mov si,bad_header_magic_str
 	call printstr
 	call printhex16 ;magic value found in ROM header
@@ -39,9 +45,7 @@ start:
 	mov di,ax ;save length (blocks) into DI
 	call printhex8 ;length in blocks
 	cmp al,0 ;length shouldn't be zero
-	jnz .good_length
-	jmp badend
-.good_length:
+	jcc8086 jz,badend
 	;*** Adjust conventional/low memory size
 if ~ defined target_segment
 	mov dx,di ;recover ROM length (blocks) from DI
@@ -49,7 +53,7 @@ if ~ defined target_segment
 	shr dx,1 ;512 blocks becomes 1KB blocks
 	int 12h ;get mem size
 	sub ax,dx ;calculate remaining conventional memory
-	jnc .mem_ok ;no underflow
+	jcc8086 jnc,.mem_ok ;no underflow
 	xor ax,ax ;conventional memory left at 0 is code for "no ram left"
 .mem_ok:
 	mov [1043],ax ;store new low mem size into BIOS variable 40:0013
@@ -65,9 +69,12 @@ end if
 	mov bp,ax ;saved for later
 	mov es,bp ;target segment
 	cmp ax,$0800 ;bootloader entrypoint + 2 blocks, >>4 because segment
-	jae .segment_ok ;not clobbering this bootloader (A20 wrap not considered)
-	jmp badend
-.segment_ok:
+	jcc8086 jae,segment_ok ;not clobbering this bootloader (A20 wrap not considered)
+badend:
+	mov si,bad_str
+	call printstr
+	jmp $ ;infinite loop deadend
+segment_ok:
 	;*** Read ROM image
 	mov si,readblocks_str
 	call printstr
@@ -83,7 +90,7 @@ end if
 	call printhex16 ;block
 	call readblock
 	add bx,512 ;next target address += 1 blocksize
-	jnc .same_segment
+	jcc8086 jnc,.same_segment
 	mov ax,es ;get segment
 	add ax,$1000 ;64KB forward, in segment terms
 	mov es,ax ;set new segment
@@ -108,10 +115,9 @@ end if
 	loop .checksum_loop
 	add di,$20 ;advance 512 bytes via segment.
 	dec bl ;blocksleft-=1
-	jnz .checksum_nextblock
+	jcc8086 jnz,.checksum_nextblock
 	cmp dl,0 ;checksum - storedchecksum (last byte) should be zero
-	jz .checksum_good
-	jmp badend
+	jcc8086 jnz,badend
 .checksum_good:
 	mov si,ok_str
 	call printstr
@@ -127,11 +133,8 @@ end if
 	call printstr ;also does zero DS. Option ROM could have changed it.
 	int 19h ;try next boot device (some BIOSs will reboot if none left)
 	;int 19h shouldn't return, so this shouldn't be reached
+	jmp badend
 ;*****************************************************************************
-badend:
-	mov si,bad_str
-	call printstr
-	jmp $ ;infinite loop deadend
 printchar: ;AL character to print
 	push bx ;preserve BX
 	push ax ;preserve AX
@@ -153,7 +156,7 @@ printstr: ;0:SI *str, ***zeroes DS***
 .printstr_loop:
 	lodsb ;load [SI++] into AL
 	test al,al ;are we done? (is character a NUL?)
-	jz .printstr_end
+	jcc8086 jz,.printstr_end
 	call printchar
 	jmp .printstr_loop
 .printstr_end:
@@ -179,7 +182,7 @@ _printhexdigits: ;intentional fallthrough
 	adc al,'0'+16 ;adc using prepared CF. We compensate 16 for last opcode
 	call printchar
 	sub cl,4 ;next digit will need less shifting to prepare
-	jns .hexdigit
+	jcc8086 jns,.hexdigit
 	pop dx ;restore DX
 	pop ax ;restore AX
 	pop cx ;restore CX
@@ -207,7 +210,7 @@ readblock: ;AX blockno, [ES:BX] dest, trashes AX (reserved, retval)
 	push ax ;preserve AX for potential retries
 	int 13h ;call BIOS function for disk operations
 	cmp ah,0 ;returned status, where 0 means OK
-	jne .error
+	jcc8086 jne,.error
 	pop ax ;free AX used for retries
 	pop di ;restore DI
 	pop dx ;restore DX
@@ -227,7 +230,7 @@ readblock: ;AX blockno, [ES:BX] dest, trashes AX (reserved, retval)
 	call printchar ;pad output for block number
 	call printchar ;2 nibbles
 	dec di ;decrement tries left
-	jnz .canretry
+	jcc8086 jnz,.canretry
 	jmp badend ;enough attempts
 .canretry:
 	pop ax ;restore AX containing parameters for retry
