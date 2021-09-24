@@ -103,7 +103,6 @@ segment_ok:
 	call printstr
 	mov bx,di ;recover ROM length (blocks) from DI
 	mov di,bp ;recover target segment from BP
-.single_segment:
 	mov dl,0 ;checksum initialized with value 0
 .checksum_nextblock:
 	mov ds,di ;DS now points to the block we're about to checksum
@@ -118,7 +117,6 @@ segment_ok:
 	jcc8086 jnz,.checksum_nextblock
 	cmp dl,0 ;checksum - storedchecksum (last byte) should be zero
 	jcc8086 jnz,badend
-.checksum_good:
 	mov si,ok_str
 	call printstr
 	;*** Call ROM image entrypoint
@@ -247,9 +245,9 @@ int19h_str: db "int19h.",0
 checksum_str: db 13,10,"Ck+",0
 bad_str: db "!BAD",0
 ok_str: db "OK.",0
-.finalize_bootblock:
+;pad rest of bootblock and add $AA55 magic value at the right location
 	times 510-($-$$) db $cc ;int3, a breakpoint. Better results should IP end up pointing here
-	dw $AA55
+	dw $AA55 ;bootblock magic value
 bootblock_end:
 if defined include_optrom
 	file include_optrom
