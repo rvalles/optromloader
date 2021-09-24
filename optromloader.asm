@@ -73,10 +73,8 @@ end if
 	call printstr
 	xor dx,dx ;block to read; will become 1 before reading
 	mov cx,di ;recover ROM length (blocks) from DI
-	cmp cx,255 ;is it 127.5KB?
-	jnz .not_255blk
-	inc cx ;127.5KB ROMs could actually be 128KB, without checksum on extra blk
-.not_255blk:
+	cmp cl,255 ;set CF if CL under 255
+	sbb cx,-1 ;add 1 if CF is set. Thus the 255 case becomes 256.
 	xor bx,bx ;target address
 .readrom:
 	;hlt ;delay for debugging
@@ -86,16 +84,13 @@ end if
 	call readblock
 	add bx,512 ;next target address += 1 blocksize
 	jnc .same_segment
-	push ax ;preserve AX
 	mov ax,es ;get segment
 	add ax,$1000 ;64KB forward, in segment terms
 	mov es,ax ;set new segment
-	pop ax ;restore AX
 .same_segment:
 	mov si,readblocksbs_str
 	call printstr
-	cmp cx,dx ;are we done
-	jne .readrom ;loop if not
+	loop .readrom ;loop if there's still blocks left to read
 	;*** Verify checksum
 	mov si,checksum_str
 	call printstr
