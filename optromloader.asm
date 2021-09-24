@@ -36,7 +36,7 @@ start:
 	call printstr
 	mov ah,0
 	mov al,[bootblock_end+2] ;load length from ROM header
-	mov bx,ax ;save length (blocks) into BX
+	mov di,ax ;save length (blocks) into DI
 	call printhex8 ;length in blocks
 	cmp al,0 ;length shouldn't be zero
 	jnz .good_length
@@ -44,7 +44,7 @@ start:
 .good_length:
 	;*** Adjust conventional/low memory size
 if ~ defined target_segment
-	mov dx,bx ;recover ROM length (blocks) from BX
+	mov dx,di ;recover ROM length (blocks) from DI
 	inc dx ;round up to even
 	shr dx,1 ;512 blocks becomes 1KB blocks
 	int 12h ;get mem size
@@ -72,7 +72,11 @@ end if
 	mov si,readblocks_str
 	call printstr
 	xor dx,dx ;block to read; will become 1 before reading
-	mov cx,bx ;recover ROM length (blocks) from BX
+	mov cx,di ;recover ROM length (blocks) from DI
+	cmp cx,255 ;is it 127.5KB?
+	jnz .not_255blk
+	inc cx ;127.5KB ROMs could actually be 128KB, without checksum on extra blk
+.not_255blk:
 	xor bx,bx ;target address
 .readrom:
 	;hlt ;delay for debugging
@@ -95,8 +99,8 @@ end if
 	;*** Verify checksum
 	mov si,checksum_str
 	call printstr
+	mov bx,di ;recover ROM length (blocks) from DI
 	mov di,bp ;recover target segment from BP
-	mov bl,cl ;recover ROM length (blocks) from CL
 .single_segment:
 	mov dl,0 ;checksum initialized with value 0
 .checksum_nextblock:
@@ -241,7 +245,7 @@ readblocks_str: db 13,10,"Rd:",0
 readblocksbs_str: db 8,8,0
 ;readblocksbs_str: db 13,10,"Rd+",0
 rominit_str: db "Init.",0
-int19h_str: db "int19h.",0
+int19h_str: db "19h.",0
 checksum_str: db 13,10,"Ck+",0
 bad_str: db "!BAD",0
 ok_str: db "OK.",0
