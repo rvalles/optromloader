@@ -95,7 +95,7 @@ end if
 	;*** Verify checksum
 	mov si,checksum_str
 	call printstr
-	mov di,bp ;revover target segment from BP
+	mov di,bp ;recover target segment from BP
 	mov bl,cl ;recover ROM length (blocks) from CL
 .single_segment:
 	mov dl,0 ;checksum initialized with value 0
