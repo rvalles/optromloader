@@ -80,6 +80,13 @@ end if
 	call printhex8 ;block
 	call readblock
 	add bx,512 ;next target address += 1 blocksize
+	jnc .same_segment
+	push ax ;preserve AX
+	mov ax,es ;get segment
+	add ax,$1000 ;64KB forward, in segment terms
+	mov es,ax ;set new segment
+	pop ax ;restore AX
+.same_segment:
 	mov si,readblocksbs_str
 	call printstr
 	cmp cx,dx ;are we done
