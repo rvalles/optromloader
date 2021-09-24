@@ -74,13 +74,13 @@ end if
 	xor dx,dx ;block to read; will become 1 before reading
 	mov cx,di ;recover ROM length (blocks) from DI
 	cmp cl,255 ;set CF if CL under 255
-	sbb cx,-1 ;add 1 if CF is set. Thus the 255 case becomes 256.
+	sbb cx,-1 ;add 1 if CF is set. Thus the 255 case becomes 256
 	xor bx,bx ;target address
 .readrom:
 	;hlt ;delay for debugging
 	inc dx ;increase target block. Needs to be 16bit, as image starts at 1
 	mov ax,dx ;block to seek to and read
-	call printhex8 ;block
+	call printhex16 ;block
 	call readblock
 	add bx,512 ;next target address += 1 blocksize
 	jnc .same_segment
@@ -237,10 +237,10 @@ bad_header_magic_str: db "Mgk:",0
 romsize_str: db "ROM blks:",0
 segment_str: db " Seg:",0
 readblocks_str: db 13,10,"Rd:",0
-readblocksbs_str: db 8,8,0
+readblocksbs_str: db 8,8,8,8,0
 ;readblocksbs_str: db 13,10,"Rd+",0
 rominit_str: db "Init.",0
-int19h_str: db "19h.",0
+int19h_str: db "int19h.",0
 checksum_str: db 13,10,"Ck+",0
 bad_str: db "!BAD",0
 ok_str: db "OK.",0
