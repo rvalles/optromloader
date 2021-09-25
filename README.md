@@ -36,7 +36,7 @@ Booted from a floppy, it will load an Option ROM image into the end of conventio
 * Optionally review Makefile for advanced usage.
   * If boot floppy drive won't be `A:`, set `bios_drive` value appropriately.
   * If specifying target segment in upper memory, ensure it is visible as memory in BIOS settings.
-    * `through-486` works on my AMI BIOS 486.
+    * `into-486` works on my AMI BIOS 486.
 * Run `make`.
 * Floppy images will be created (fd*.img).
 * Optionally test 1.44M image with qemu: `make emulate`.
