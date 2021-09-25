@@ -14,6 +14,9 @@ readblock_tries=readblock_retries+1
 else
 readblock_tries=5 ;use FDD with care
 end if
+if ~ definite bios_drive
+bios_drive=0
+end if
 org 7C00h ;fixed bootloader load address
 	jmp 0x0000:start ;ensure CS is zero
 start:
