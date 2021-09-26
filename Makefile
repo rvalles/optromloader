@@ -5,8 +5,8 @@ readblock_retries = 7
 hexdumpcmd = hexdump -C
 #hexdumpcmd = xxd -a
 qemu = qemu-system-i386
-date = \"`date -u +%Y%m%d%H%MZ`\"
-fasm_extraopts += -d build_date=$(date)
+build_date = $(shell date -u +%Y%m%d%H%MZ)
+fasm_extraopts += -d build_date=\"$(build_date)\"
 fasm_extraopts += -d readblock_retries=$(readblock_retries)
 .PHONY: all
 all: optromloader18 optromloader15 optromloader9 fd1440.img fd720.img fd1200.img fd360.img hexdump
