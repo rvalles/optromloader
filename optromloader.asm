@@ -229,7 +229,9 @@ readblock: ;AX blockno, [ES:BX] dest, trashes AX (reserved, retval)
 	call printstr ;reprint header in next line to preserve read error on screen
 	mov ax,'_' ;pad character
 	call printchar ;pad output for block number
-	call printchar ;2 nibbles
+	call printchar
+	call printchar
+	call printchar ;4 nibbles
 	dec di ;decrement tries left
 	jcc8086 jnz,.canretry
 	jmp badend ;enough attempts
