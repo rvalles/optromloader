@@ -1,6 +1,6 @@
 # optromloader: IBM PC/Clone 8086+ floppy-loading of option roms.
 
-Booted from a floppy, it will load an Option ROM image into the end of conventional memory.
+Booted from a floppy, it will load an Option ROM image into the top of conventional memory.
 
 ![PCem Amstrad PC1512 screenshot](https://b.rvalles.net/unsorted/pcem_pc1512_optromboot_1.2.0_xtide.png)
 
