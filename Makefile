@@ -2,11 +2,17 @@ fasm = fasm
 fasm_extraopts = -d bios_drive=0
 #fasm_extraopts += -d target_segment=0xE000
 readblock_retries = 7
+qemu = qemu-system-i386
 hexdumpcmd = hexdump -C
 #hexdumpcmd = xxd -a
-qemu = qemu-system-i386
+deletecmd = rm -f
 build_date = $(shell date -u +%Y%m%d%H%MZ)
-fasm_extraopts += -d build_date=\"$(build_date)\"
+ifeq ($(OS),Windows_NT)
+	deletecmd = del
+	hexdumpcmd = echo
+else
+	fasm_extraopts += -d build_date=\"$(build_date)\"
+endif
 fasm_extraopts += -d readblock_retries=$(readblock_retries)
 .PHONY: all
 all: optromloader18 optromloader15 optromloader9 fd1440.img fd720.img fd1200.img fd360.img hexdump
@@ -38,7 +44,7 @@ testrom.bin: testrom.asm
 .PHONY: clean
 clean:
 	@echo "*** Removing build artifacts..."
-	rm -f optromloader9 optromloader15 optromloader18 fd1440.img fd720.img fd1200.img fd360.img testrom.bin
+	$(deletecmd) optromloader9 optromloader15 optromloader18 fd1440.img fd720.img fd1200.img fd360.img testrom.bin
 .PHONY: hexdump
 hexdump: optromloader18
 	@echo "*** hexdump optromloader18..."
