@@ -17,6 +17,9 @@ end if
 if ~ definite bios_drive
 bios_drive=0
 end if
+if ~ definite build_date
+build_date equ "w/o date"
+end if
 org 7C00h ;fixed bootloader load address
 	jmp 0x0000:start ;ensure CS is zero
 start:
