@@ -20,7 +20,7 @@ Booted from a floppy, it will load an Option ROM image into the top of conventio
   * Alternatively allows specifying target segment (upper area possible).
 * Works on PC/XT/AT and clones.
   * Also works on newer hardware, such as the 486 with AMI BIOS I wrote it for.
-* Trivial to use. Concatenate loader and the ROM image, write into floppy.
+* Trivial to use.
 * Makefile will prepare 5.25" 360K/1.2M and 3.5" 720K/1.44M floppy images.
 * MIT License. See LICENSE file.
 
