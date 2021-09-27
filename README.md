@@ -12,7 +12,7 @@ Booted from a floppy, it will load an Option ROM image into the top of conventio
 ## Highlights
 * Flat assembler syntax.
 * Pure 8086 code.
-* Fits in a floppy bootblock.
+* Single stage. (Fits in a floppy bootblock)
 * Verifies ROM image checksum after loading.
 * Supports all Option ROM sizes. Spec goes up to 127.5KB, but full 128KB ROMs are supported.
   * An extra block is read when length=255 (127.5KB/128KB case).
