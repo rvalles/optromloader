@@ -29,7 +29,7 @@ start:
 	mov sp,$7C00 ;set a stack right under the bootloader
 	sti ;re-enable interrupts from 8086/86 workaround
 	mov ds,ax ;DS can't be trusted either
-	mov es,ax ;ES isn't any more trustworthy
+	mov es,ax ;ES isn't any more trustworthy, and is used by readblock below
 	mov si,banner_str
 	call printstr
 	;*** Load first block of ROM image (containing ROM header)
