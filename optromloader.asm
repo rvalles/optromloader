@@ -27,7 +27,7 @@ start:
 	cli ;Ralph Brown's Interrupt List's 86BUGS.LST (MOV)
 	mov ss,ax ;handed-over SS could be anything, like CS
 	mov sp,$7C00 ;set a stack right under the bootloader
-	sti ;re-enable interrupts from 8086/86 workaround
+	sti ;re-enable interrupts from 8086/88 workaround
 	mov ds,ax ;DS can't be trusted either
 	mov es,ax ;ES isn't any more trustworthy, and is used by readblock below
 	mov si,banner_str
