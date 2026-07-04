@@ -6,6 +6,7 @@ qemu = qemu-system-i386
 hexdumpcmd = hexdump -C
 #hexdumpcmd = xxd -a
 deletecmd = rm -f
+writecmd = gw write --format ibm.1440
 build_date = $(shell date -u +%Y%m%d%H%MZ)
 ifeq ($(OS),Windows_NT)
 	deletecmd = del
@@ -57,3 +58,7 @@ emulate: fd1440.img
 emulaterom: optrom.bin
 	@echo "*** Emulating with qemu..."
 	$(qemu) -net none -option-rom optrom.bin
+.PHONY: write
+write: fd1440.img
+	@echo "*** writing $< into a floppy..."
+	$(writecmd) $<
