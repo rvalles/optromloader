@@ -168,7 +168,7 @@ printstr: ;0:SI *str, ***zeroes DS***
 .printstr_end:
 	pop ax ;restore AX
 	ret
-printhex8: ;character in AX
+printhex8: ;byte in AL
 	push cx ;preserve CX
 	mov cl,4 ;how much to shift right to get first nibble
 	jmp _printhexdigits
@@ -199,7 +199,7 @@ readblock: ;AX blockno, [ES:BX] dest, trashes AX (reserved, retval)
 	push di ;preserve DI
 	;*** CHS magic
 	;tracks>>1 is cyl, tracks&1 is head
-	mov dl,sectors_per_track ;get number of tracks
+	mov dl,sectors_per_track ;get sectors per track
 	div dl ;ax/dl -> /al, %ah
 	mov dh,1 ;tracks&1 is head
 	and dh,al ;CHS head 0..15 (0 or 1 for floppy)
