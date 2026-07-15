@@ -64,7 +64,7 @@ delayloop: ;CX ticks to wait (not preserved)
 .delayloop:
 	mov ax,[$6C] ;get current timeofday lower 16bit
 	sub ax,cx ;is it lower than the target time?
-	jc .delayloop ;wait further if so.
+	jl .delayloop ;wait further if so. signed cmp, handles tick counter wraparound
 	mov ds,bx ;restore ds to what it was
 	pop bx ;restore BX
 	pop ax ;restore AX
